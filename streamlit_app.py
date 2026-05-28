@@ -17,7 +17,7 @@ st.set_page_config(
     page_title="FlavorIQ - AI Restaurant Recommender",
     page_icon="✨",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Custom CSS injection for premium glassmorphism aesthetics
@@ -25,75 +25,183 @@ st.markdown("""
     <style>
     /* Gradient Background */
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important;
+        background: linear-gradient(135deg, #0d1117 0%, #171d26 50%, #0d1117 100%) !important;
         color: #f8fafc !important;
     }
     
-    /* Input Labels */
-    label, p, span {
-        color: #e2e8f0 !important;
+    /* Input Labels and Text */
+    label, p, span, h1, h2, h3, h4, h5, h6 {
+        color: #cbd5e1 !important;
     }
     
-    /* Glassmorphism card for the results */
-    .restaurant-card {
-        background: rgba(30, 41, 59, 0.7) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 20px;
-        position: relative;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-        transition: border-color 0.3s ease;
+    /* Hide Streamlit sidebar by default */
+    section[data-testid="stSidebar"] {
+        display: none !important;
     }
     
-    .restaurant-card:hover {
-        border-color: rgba(244, 63, 94, 0.4);
+    /* Card container styling */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #1e2530 !important;
+        border: 1px solid rgba(71, 85, 105, 0.4) !important;
+        border-radius: 16px !important;
+        padding: 32px !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
     }
     
-    /* Rank circular badge */
-    .rank-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: linear-gradient(135deg, #f43f5e, #f97316);
+    /* Style all text inputs */
+    div[data-baseweb="input"] {
+        background-color: #141a24 !important;
+        border: 1px solid rgba(45, 55, 72, 0.8) !important;
+        border-radius: 12px !important;
+    }
+    div[data-baseweb="input"] input {
         color: white !important;
-        border-radius: 50%;
-        width: 35px;
-        height: 35px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+        background-color: transparent !important;
+        font-size: 0.9rem !important;
     }
     
-    /* Ambiance Badge */
-    .ambiance-badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 6px;
-        background: rgba(244, 63, 94, 0.1);
-        border: 1px solid rgba(244, 63, 94, 0.2);
-        color: #f43f5e !important;
-        font-size: 0.75rem;
-        margin-right: 6px;
-        margin-top: 4px;
+    /* Style select boxes */
+    div[data-baseweb="select"] {
+        background-color: #141a24 !important;
+        border: 1px solid rgba(45, 55, 72, 0.8) !important;
+        border-radius: 12px !important;
+    }
+    div[data-baseweb="select"] div {
+        color: white !important;
+        background-color: transparent !important;
+        font-size: 0.9rem !important;
     }
     
-    /* Reasoning Quote Box */
-    .reasoning-box {
-        background: rgba(15, 23, 42, 0.5);
-        border-left: 4px solid #f43f5e;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-top: 15px;
+    /* Primary Button (Find Recommendations) */
+    div.stButton > button[kind="primary"] {
+        background: linear-gradient(to right, #ff3b30, #ff9500) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 9999px !important;
+        padding: 12px 24px !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        box-shadow: 0 4px 20px rgba(255, 59, 48, 0.25) !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+    div.stButton > button[kind="primary"]:hover {
+        box-shadow: 0 4px 25px rgba(255, 59, 48, 0.4) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Secondary Button (Get AI Recommendations / View Details) */
+    div.stButton > button:not([kind="primary"]) {
+        background-color: #1e2530 !important;
+        color: white !important;
+        border: 1px solid rgba(71, 85, 105, 0.6) !important;
+        border-radius: 9999px !important;
+        padding: 10px 24px !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+    div.stButton > button:not([kind="primary"]):hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: #10b981 !important;
+    }
+    
+    /* Rating Slider thumb and filled track styling */
+    div[role="slider"] {
+        background-color: #ff5b3f !important;
+        border: none !important;
+        box-shadow: 0 0 12px rgba(255, 91, 63, 0.8) !important;
+        width: 16px !important;
+        height: 16px !important;
+        top: -6px !important;
+    }
+    div[data-testid="stSlider"] div[aria-valuemax] {
+        background: linear-gradient(to right, #ff3b30, #ff9500) !important;
+    }
+    
+    /* Hide the radio button selection circle */
+    div[role="radiogroup"] [data-testid="stRadioCircle"] {
+        display: none !important;
+    }
+    /* Flex layouts for radio choices */
+    div[role="radiogroup"] {
+        display: flex !important;
+        gap: 16px !important;
+        width: 100% !important;
+    }
+    div[role="radiogroup"] label {
+        flex: 1 !important;
+        background-color: #141a24 !important;
+        border: 1px solid rgba(45, 55, 72, 0.8) !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        text-align: center !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    div[role="radiogroup"] label:hover {
+        border-color: rgba(255, 91, 63, 0.5) !important;
+    }
+    /* Style the selected radio button label */
+    div[role="radiogroup"] label[data-checked="true"] {
+        background: linear-gradient(to right, #ff3b30, #ff9500) !important;
+        border: none !important;
+        color: white !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3) !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 2. Cache Data Loading
+# 2. Helpers for Mock Enrichment
+def get_cuisine_image(cuisine: str, index: int) -> str:
+    c = (cuisine or '').lower()
+    if any(x in c for x in ['italian', 'pizza', 'pasta']):
+        return f"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80&sig={index}"
+    if any(x in c for x in ['indian', 'biryani', 'kebab', 'curry']):
+        return f"https://images.unsplash.com/photo-1585938338392-50a599e0217b?w=800&q=80&sig={index}"
+    if any(x in c for x in ['asian', 'chinese', 'thai', 'sushi']):
+        return f"https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80&sig={index}"
+    if any(x in c for x in ['cafe', 'bakery', 'dessert', 'coffee']):
+        return f"https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80&sig={index}"
+    if any(x in c for x in ['burger', 'fast food', 'american']):
+        return f"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80&sig={index}"
+    return f"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80&sig={index}"
+
+def get_popular_dishes(cuisine: str) -> list[str]:
+    c = (cuisine or '').lower()
+    if 'italian' in c:
+        return ["Truffle Pasta", "Margherita Pizza", "Tiramisu"]
+    if 'indian' in c:
+        return ["Butter Chicken", "Garlic Naan", "Paneer Tikka"]
+    if any(x in c for x in ['asian', 'chinese']):
+        return ["Dim Sum", "Kung Pao Chicken", "Hakka Noodles"]
+    if any(x in c for x in ['cafe', 'continental']):
+        return ["Avocado Toast", "Club Sandwich", "Red Velvet Waffle"]
+    return ["Chef's Special", "Signature Dish", "House Dessert"]
+
+def get_ambiance_tags(rating: float, cost: float) -> list[str]:
+    tags = []
+    if rating and rating >= 4.3:
+        tags.append("Fine Dining")
+    else:
+        tags.append("Casual Dining")
+    
+    if cost and cost >= 1200:
+        tags.append("Romantic")
+    elif cost and cost <= 500:
+        tags.append("Pocket Friendly")
+    else:
+        tags.append("Cozy Vibe")
+        
+    tags.append("Great Service")
+    return tags
+
+# 3. Cache Data Loading
 @st.cache_resource
 def get_service():
     data_path = Path("data/restaurants.parquet")
@@ -107,124 +215,334 @@ except Exception as e:
     st.error(f"Failed to load data store: {e}")
     st.stop()
 
-# 3. Sidebar (Preferences Form)
-with st.sidebar:
-    st.markdown("""
-        <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 8px;'>
-            <div style='width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f43f5e, #f97316); display: flex; align-items: center; justify-content: center;'>
-                <span style='font-size: 1.4rem; color: white !important;'>✨</span>
-            </div>
-            <h1 style='margin: 0; font-size: 1.8rem; color: white !important; font-weight: 700;'>FlavorIQ</h1>
-        </div>
-        <p style='color: #94a3b8 !important; font-size: 0.85rem; margin-top: 0;'>AI-powered culinary intelligence for your dining experience</p>
-        <hr style='border-color: rgba(255,255,255,0.1); margin-top: 0; margin-bottom: 20px;' />
-    """, unsafe_allow_html=True)
-    
-    st.subheader("Your Preferences")
-    
-    # Location Selection
-    locations = store.known_locations(limit=100)
-    selected_location = st.selectbox("Location", options=locations)
-    
-    # Cuisine Input
-    selected_cuisine = st.text_input("Cuisine", placeholder="e.g. Italian, North Indian")
-    
-    # Budget Tier Selector
-    selected_budget = st.selectbox(
-        "Budget Tier", 
-        options=[BudgetTier.LOW, BudgetTier.MEDIUM, BudgetTier.HIGH],
-        format_func=lambda x: x.value.capitalize(),
-        index=1
-    )
-    
-    # Rating Slider
-    min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
-    
-    # Extras tag list
-    extras_input = st.text_input("Extras (Optional, comma-separated)", placeholder="e.g. romantic, outdoor seating")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    submit_btn = st.button("Find Recommendations", use_container_width=True, type="primary")
+# 4. Initialize Session State
+if "view" not in st.session_state:
+    st.session_state.view = "search"
+if "previous_view" not in st.session_state:
+    st.session_state.previous_view = "search"
+if "selected_item" not in st.session_state:
+    st.session_state.selected_item = None
+if "recommendations" not in st.session_state:
+    st.session_state.recommendations = []
+if "ai_summary" not in st.session_state:
+    st.session_state.ai_summary = ""
+if "warnings" not in st.session_state:
+    st.session_state.warnings = []
 
-# 4. Main Panel Layout
-if submit_btn:
-    if not selected_cuisine:
-        st.warning("Please enter at least one cuisine.")
-    else:
-        with st.spinner("AI is analyzing local matches..."):
-            cuisines_list = [c.strip() for c in selected_cuisine.split(",") if c.strip()]
-            extras_list = [e.strip() for e in extras_input.split(",") if e.strip()] if extras_input else []
+# 5. Render Views
+# 5a. Search View
+if st.session_state.view == "search":
+    col_left, col_mid, col_right = st.columns([1, 6, 1])
+    
+    with col_mid:
+        st.markdown("""
+            <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: center; padding-top: 40px;'>
+                <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
+                    <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
+                        <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+                    </svg>
+                </div>
+                <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
+            </div>
+            <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: center; margin-bottom: 32px;'>AI-powered culinary intelligence for your perfect dining experience</p>
+        """, unsafe_allow_html=True)
+        
+        with st.container(border=True):
+            st.markdown("<h2 style='margin-top:0; font-size: 1.5rem; font-weight: 700; color: white !important; margin-bottom: 24px;'>Preferences</h2>", unsafe_allow_html=True)
             
-            prefs = UserPreferences(
-                location=selected_location,
-                budget=selected_budget,
-                cuisines=cuisines_list,
-                min_rating=min_rating,
-                extras=extras_list,
-                top_n=5
+            # Location dropdown
+            locations = store.known_locations(limit=100)
+            if "Bangalore" in locations:
+                locations.remove("Bangalore")
+                locations = ["Bangalore"] + locations
+            selected_location = st.selectbox("Location", options=locations)
+            
+            # Cuisine text input
+            selected_cuisine = st.text_input("Cuisine", placeholder="e.g. Italian, North Indian")
+            
+            # Budget horizontal radio button group
+            selected_budget = st.radio(
+                "Budget", 
+                options=[BudgetTier.LOW, BudgetTier.MEDIUM, BudgetTier.HIGH],
+                format_func=lambda x: x.value.capitalize(),
+                index=1,
+                horizontal=True
             )
             
-            try:
-                result = service.recommend(prefs)
-                
-                # Header Summary
-                if result.summary:
-                    st.success(f"✨ **AI Summary:** {result.summary}")
-                
-                # Warnings & Notice
-                if result.metadata.warnings:
-                    for warning in result.metadata.warnings:
-                        st.info(f"⚠️ {warning}")
-                
-                # Recommendations Feed
-                for rec in result.recommendations:
-                    # Look up original restaurant to get raw attributes like address or type
-                    orig_rest = store.get_by_id(rec.restaurant_id)
-                    address = "Locality Road, India"
-                    ambiance_badges = ""
-                    
-                    if orig_rest:
-                        if orig_rest.raw_attributes:
-                            address = orig_rest.raw_attributes.get("address", address)
-                            rest_type = orig_rest.raw_attributes.get("rest_type")
-                            if rest_type:
-                                # Split by comma to render individual badges
-                                types = [t.strip() for t in rest_type.split(",") if t.strip()]
-                                for t in types:
-                                    ambiance_badges += f'<span class="ambiance-badge">{t}</span>'
+            # Minimum Rating slider
+            min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
+            
+            # Extras optional text input
+            extras_input = st.text_input("Extras (Optional)", placeholder="e.g. outdoor seating, romantic")
+            
+            st.markdown("<div style='margin-top: 24px;'></div>", unsafe_allow_html=True)
+            
+            # Actions buttons
+            find_btn = st.button("Find Recommendations", use_container_width=True, type="primary")
+            ai_btn = st.button("✨ Get AI Recommendations", use_container_width=True)
+            
+            if find_btn or ai_btn:
+                if not selected_cuisine:
+                    st.error("Please enter at least one cuisine.")
+                else:
+                    with st.spinner("AI is analyzing local matches..."):
+                        cuisines_list = [c.strip() for c in selected_cuisine.split(",") if c.strip()]
+                        extras_list = [e.strip() for e in extras_input.split(",") if e.strip()] if extras_input else []
+                        
+                        prefs = UserPreferences(
+                            location=selected_location,
+                            budget=selected_budget,
+                            cuisines=cuisines_list,
+                            min_rating=min_rating,
+                            extras=extras_list,
+                            top_n=9
+                        )
+                        
+                        try:
+                            result = service.recommend(prefs)
+                            
+                            # Enrich results
+                            enriched = []
+                            for i, rec in enumerate(result.recommendations):
+                                r_id = rec.restaurant_id
+                                mock_distance = f"{((int(r_id[:4], 16) % 35 + 10) / 10):.1f} km"
+                                mock_review_count = int(rec.rating * 74 + (int(r_id[4:6], 16) % 150))
+                                mock_phone = f"+91 80 4{(int(r_id[:6], 16) % 9000000 + 1000000)}"
+                                mock_address = f"{rec.name}, Locality Road, {selected_location}, India"
+                                
+                                orig_rest = store.get_by_id(r_id)
+                                if orig_rest and orig_rest.raw_attributes:
+                                    mock_address = orig_rest.raw_attributes.get("address", mock_address)
                                     
-                    st.markdown(f"""
-                        <div class="restaurant-card">
-                            <div class="rank-badge">#{rec.rank}</div>
-                            <h3 style="margin-top:0; color:white; font-size: 1.45rem; font-weight: 600;">{rec.name}</h3>
-                            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px;">
-                                🍽️ {rec.cuisine} &nbsp;|&nbsp; ⭐ {rec.rating:.1f} &nbsp;|&nbsp; 💰 ₹{rec.estimated_cost or 500:.0f} for two
-                            </p>
-                            <p style="color: #64748b; font-size: 0.825rem; margin-bottom: 12px; font-style: italic;">
-                                📍 {address}
-                            </p>
-                            <div>
-                                {ambiance_badges}
+                                rec_item = {
+                                    "rank": rec.rank,
+                                    "restaurant_id": rec.restaurant_id,
+                                    "name": rec.name,
+                                    "cuisine": rec.cuisine,
+                                    "rating": rec.rating,
+                                    "estimated_cost": rec.estimated_cost or 500,
+                                    "explanation": rec.explanation,
+                                    "image": get_cuisine_image(rec.cuisine, i),
+                                    "address": mock_address,
+                                    "phone": mock_phone,
+                                    "hours": "12:00 PM - 11:30 PM",
+                                    "distance": mock_distance,
+                                    "reviewCount": mock_review_count,
+                                    "popularDishes": get_popular_dishes(rec.cuisine),
+                                    "ambiance": get_ambiance_tags(rec.rating, rec.estimated_cost or 500)
+                                }
+                                enriched.append(rec_item)
+                                
+                            st.session_state.recommendations = enriched
+                            st.session_state.ai_summary = result.summary or ""
+                            st.session_state.warnings = result.metadata.warnings or []
+                            st.session_state.view = "results"
+                            st.session_state.previous_view = "search"
+                            st.rerun()
+                            
+                        except OrchestrationError as e:
+                            st.error(f"Recommendation Failed: {e.message}")
+                        except Exception as e:
+                            st.error(f"Something went wrong: {e}")
+
+# 5b. Results View
+elif st.session_state.view == "results":
+    # Back button
+    if st.button("← Back to Search", key="back_to_search"):
+        st.session_state.view = "search"
+        st.rerun()
+        
+    st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
+    
+    # AI Summary Banner
+    if st.session_state.ai_summary:
+        st.markdown(f"""
+            <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
+                <div style='display: flex; gap: 12px; align-items: start;'>
+                    <span style='font-size: 1.2rem; color: #10b981;'>✨</span>
+                    <div>
+                        <h3 style='margin: 0 0 4px 0; color: #10b981 !important; font-size: 1.1rem; font-weight: 600;'>AI Summary</h3>
+                        <p style='margin: 0; color: #cbd5e1 !important; font-size: 0.9rem; line-height: 1.5;'>{st.session_state.ai_summary}</p>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    # Warnings Banner
+    if st.session_state.warnings:
+        for warn in st.session_state.warnings:
+            st.info(f"⚠️ {warn}")
+            
+    # Results Grid (3 columns)
+    recs = st.session_state.recommendations
+    if not recs:
+        st.info("No recommendations found matching your criteria.")
+    else:
+        for i in range(0, len(recs), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                if i + j < len(recs):
+                    item = recs[i+j]
+                    with cols[j]:
+                        # Card markup
+                        st.markdown(f"""
+                            <div style='border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; background: rgba(30, 41, 59, 0.7); position: relative; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
+                                <div style='position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #f97316); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white !important; z-index: 10;'>
+                                    #{item["rank"]}
+                                </div>
+                                <div style='height: 180px; width: 100%; overflow: hidden; position: relative;'>
+                                    <img src='{item["image"]}' style='width: 100%; height: 100%; object-fit: cover;' />
+                                    <div style='position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%);'></div>
+                                </div>
+                                <div style='padding: 20px;'>
+                                    <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: white;'>{item["name"]}</h3>
+                                    
+                                    <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
+                                        <span style='color: #fbbf24; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
+                                            ⭐ {item["rating"]:.1f} <span style='color: #64748b; font-size: 0.75rem; font-weight: 400;'>({item["reviewCount"]})</span>
+                                        </span>
+                                        <span style='color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;'>
+                                            📍 {item["distance"]}
+                                        </span>
+                                    </div>
+                                    
+                                    <div style='display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;'>
+                                        <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #e2e8f0;'>
+                                            {item["cuisine"]}
+                                        </span>
+                                        <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; color: #34d399;'>
+                                            ₹{item["estimated_cost"]:.0f} for two
+                                        </span>
+                                    </div>
+                                    
+                                    <div style='margin-bottom: 12px;'>
+                                        <span style='font-size: 0.75rem; color: #64748b; display: block; margin-bottom: 2px;'>Popular:</span>
+                                        <p style='margin: 0; font-size: 0.85rem; color: #cbd5e1;'>{", ".join(item["popularDishes"])}</p>
+                                    </div>
+                                    
+                                    <div style='display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;'>
+                                        {" ".join([f'<span style="padding: 2px 6px; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.15); font-size: 0.7rem; color: #f43f5e;">{tag}</span>' for tag in item["ambiance"]])}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="reasoning-box">
-                                <p style="margin: 0; font-style: italic; color: #e2e8f0; font-size: 0.95rem; line-height: 1.5;">
-                                    "{rec.explanation}"
-                                </p>
-                            </div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-            except OrchestrationError as e:
-                st.error(f"Recommendation Failed: {e.message}")
-            except Exception as e:
-                st.error(f"Something went wrong: {e}")
-else:
-    # Default Welcome Screen
-    st.markdown("""
-        <div style='text-align: center; padding: 100px 20px;'>
-            <h2 style='font-size: 2.2rem; color: white !important; font-weight: 600; margin-bottom: 15px;'>Ready to Discover?</h2>
-            <p style='color: #94a3b8 !important; font-size: 1.1rem; max-width: 600px; margin: 0 auto;'>
-                Configure your preferences in the sidebar on the left and submit to find the absolute best-suited restaurants powered by our recommendation engine.
-            </p>
+                        """, unsafe_allow_html=True)
+                        if st.button("View Details", key=f"btn_details_{item['restaurant_id']}", use_container_width=True):
+                            st.session_state.selected_item = item
+                            st.session_state.view = "detail"
+                            st.session_state.previous_view = "results"
+                            st.rerun()
+
+# 5c. Detail View
+elif st.session_state.view == "detail" and st.session_state.selected_item:
+    item = st.session_state.selected_item
+    
+    if st.button("← Back to Results", key="back_to_results"):
+        st.session_state.view = st.session_state.previous_view
+        st.rerun()
+        
+    st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
+    
+    st.markdown(f"""
+        <div style='height: 320px; border-radius: 16px; overflow: hidden; position: relative; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
+            <img src='{item["image"]}' style='width: 100%; height: 100%; object-fit: cover;' />
+            <div style='position: absolute; inset: 0; background: linear-gradient(to top, #0f172a 15%, rgba(15,23,42,0.3) 100%);'></div>
+            <div style='position: absolute; bottom: 24px; left: 24px;'>
+                <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 8px;'>
+                    <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700;'>{item["name"]}</h1>
+                    <div style='padding: 4px 12px; border-radius: 9999px; background: linear-gradient(135deg, #f43f5e, #f97316); color: white !important; font-weight: bold; font-size: 0.9rem;'>
+                        #{item["rank"]}
+                    </div>
+                </div>
+                <div style='display: flex; align-items: center; gap: 16px; font-size: 0.95rem; color: #cbd5e1;'>
+                    <span style='color: #fbbf24; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
+                        ⭐ {item["rating"]:.1f} <span style='color: #94a3b8; font-weight: 400;'>({item["reviewCount"]} reviews)</span>
+                    </span>
+                    <span>•</span>
+                    <span>{item["cuisine"]}</span>
+                    <span>•</span>
+                    <span style='color: #34d399; font-weight: 600;'>₹{item["estimated_cost"]:.0f} for two</span>
+                </div>
+            </div>
         </div>
     """, unsafe_allow_html=True)
+    
+    col_left, col_right = st.columns([2, 1])
+    
+    with col_left:
+        st.markdown(f"""
+            <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
+                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Ambiance & Features</h3>
+                <div style='display: flex; flex-wrap: wrap; gap: 10px;'>
+                    {" ".join([f'<span style="padding: 6px 14px; border-radius: 9999px; background: linear-gradient(to right, rgba(244,63,94,0.15), rgba(249,115,22,0.15)); border: 1px solid rgba(244,63,94,0.25); color: #fecdd3; font-weight: 500; font-size: 0.85rem;">{tag}</span>' for tag in item["ambiance"]])}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+            <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
+                <div style='display: flex; gap: 12px; align-items: start;'>
+                    <span style='font-size: 1.3rem; color: #10b981; margin-top: 2px;'>✨</span>
+                    <div>
+                        <h3 style='margin: 0 0 8px 0; color: #10b981 !important; font-size: 1.2rem; font-weight: 600;'>Why AI Recommends This</h3>
+                        <p style='margin: 0; color: #e2e8f0 !important; font-size: 0.95rem; line-height: 1.6; font-style: italic;'>"{item["explanation"]}"</p>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+            <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
+                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Must-Try Dishes</h3>
+                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;'>
+                    {" ".join([f'''
+                        <div style='padding: 16px; border-radius: 12px; background: rgba(51, 65, 85, 0.4); border: 1px solid rgba(255,255,255,0.06);'>
+                            <span style='font-size: 1.1rem; display: block; margin-bottom: 6px;'>🍽️</span>
+                            <span style='color: white; font-weight: 500; font-size: 0.9rem;'>{dish}</span>
+                        </div>
+                    ''' for dish in item["popularDishes"]])}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col_right:
+        st.markdown(f"""
+            <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
+                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 20px;'>Details</h3>
+                
+                <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 20px;'>
+                    <span style='color: #f43f5e; font-size: 1.1rem;'>📍</span>
+                    <div>
+                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Address</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["address"]}</span>
+                    </div>
+                </div>
+                
+                <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 20px;'>
+                    <span style='color: #f97316; font-size: 1.1rem;'>🧭</span>
+                    <div>
+                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Distance</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["distance"]} away</span>
+                    </div>
+                </div>
+                
+                <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 20px;'>
+                    <span style='color: #10b981; font-size: 1.1rem;'>📞</span>
+                    <div>
+                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Phone</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["phone"]}</span>
+                    </div>
+                </div>
+                
+                <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 24px;'>
+                    <span style='color: #3b82f6; font-size: 1.1rem;'>🕒</span>
+                    <div>
+                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Hours</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["hours"]}</span>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
+        reserve_btn = st.button("Reserve Table", use_container_width=True, type="primary")
+        directions_btn = st.button("Get Directions", use_container_width=True)
