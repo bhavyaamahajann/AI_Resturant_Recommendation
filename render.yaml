@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: flavoriq-backend
+    runtime: docker
+    plan: free # Can be upgraded by the user if needed
+    envVars:
+      - key: LLM_API_KEY
+        sync: false # The user will configure their Groq API Key securely in the Render UI
+      - key: LLM_MODEL
+        value: llama3-8b-8192
+      - key: DATA_PATH
+        value: data/restaurants.parquet

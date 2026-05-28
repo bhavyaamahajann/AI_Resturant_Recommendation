@@ -101,13 +101,25 @@ class CandidateFilterService:
                 "Some filters were relaxed: " + ", ".join(relaxed) + "."
             )
 
-        if len(matched) < 3:
+        sorted_matches = self._sort_matches(matched, preferences)
+
+        # Deduplicate sorted matches by name (case-insensitive) to ensure brand diversity
+        seen_names = set()
+        deduped_matches = []
+        for r in sorted_matches:
+            name_key = r.name.lower().strip()
+            if name_key not in seen_names:
+                seen_names.add(name_key)
+                deduped_matches.append(r)
+
+        total_before_cap = len(deduped_matches)
+
+        if total_before_cap < 3:
             warnings.append(
-                f"Only {len(matched)} restaurant(s) matched your criteria."
+                f"Only {total_before_cap} restaurant(s) matched your criteria."
             )
 
-        sorted_matches = self._sort_matches(matched, preferences)
-        capped = sorted_matches[: self._settings.candidate_limit]
+        capped = deduped_matches[: self._settings.candidate_limit]
 
         if total_before_cap > self._settings.candidate_limit:
             warnings.append(

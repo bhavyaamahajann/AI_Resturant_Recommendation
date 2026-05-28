@@ -149,6 +149,39 @@ class TestCandidateFilter:
         assert len(result.restaurants) == get_settings().candidate_limit
         assert result.metadata.total_matches_before_cap > get_settings().candidate_limit
 
+    def test_deduplication_by_name(self, small_store):
+        r1 = Restaurant(
+            id="r1",
+            name="Duplicate Brand",
+            location="Area A",
+            location_normalized="Bangalore",
+            cuisines=["Italian"],
+            rating=4.5,
+            budget_tier=BudgetTier.MEDIUM,
+        )
+        r2 = Restaurant(
+            id="r2",
+            name="Duplicate Brand",
+            location="Area B",
+            location_normalized="Bangalore",
+            cuisines=["Italian"],
+            rating=4.2,
+            budget_tier=BudgetTier.MEDIUM,
+        )
+        store = RestaurantStore(small_store.get_all() + [r1, r2])
+        service = CandidateFilterService(store, settings=get_settings())
+        prefs = UserPreferences(
+            location="Bangalore",
+            budget=BudgetTier.MEDIUM,
+            cuisines=["Italian"],
+        )
+        result = service.get_candidates(prefs)
+        
+        # Check that 'Duplicate Brand' is only included once
+        duplicates = [r for r in result.restaurants if r.name == "Duplicate Brand"]
+        assert len(duplicates) == 1
+        assert duplicates[0].id == "r1"  # Keep the higher rating
+
 
 class TestFilterPerformance:
     @pytest.mark.skipif(
