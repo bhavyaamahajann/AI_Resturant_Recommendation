@@ -8,7 +8,7 @@ from src.services.llm import LLMGateway, LLMError
 def mock_settings():
     class MockSettings:
         llm_api_key = "test_key"
-        llm_model = "llama3-8b-8192"
+        llm_model = "llama-3.3-70b-versatile"
         llm_timeout_sec = 1
     return MockSettings()
 

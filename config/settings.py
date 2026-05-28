@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     min_city_rows_for_percentiles: int = 10
     max_field_length: int = 500
     llm_api_key: str = ""
-    llm_model: str = "llama3-8b-8192"
+    llm_model: str = "llama-3.3-70b-versatile"
     llm_timeout_sec: int = 30
 
     @field_validator("data_path", mode="before")
