@@ -114,20 +114,62 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Unsplash Photo ID Collections for Dynamic Image Sourcing
+ITALIAN_PHOTOS = [
+    "photo-1546069901-ba9599a7e63c",  # salad/pasta
+    "photo-1513104890138-7c749659a591",  # pizza
+    "photo-1551183053-bf91a1d81141",  # pasta
+    "photo-1595295333158-4742f28fbd85",  # pasta dish
+    "photo-1555396273-367ea4eb4db5"   # wine/interior
+]
+
+INDIAN_PHOTOS = [
+    "photo-1585938338392-50a599e0217b",  # biryani
+    "photo-1601050690597-df056fb4ce78",  # samosa/curry
+    "photo-1565557623262-b51c2513a641",  # tandoori
+    "photo-1626777552726-4a6b54c97e46",  # thali
+    "photo-1589301760014-d929f3979dbc"   # curry
+]
+
+ASIAN_PHOTOS = [
+    "photo-1563245372-f21724e3856d",  # sushi
+    "photo-1540648639573-8c848de23f0a",  # noodles
+    "photo-1552611052-33e04de081de",  # ramen
+    "photo-1512058564366-18510be2db19"   # stir fry
+]
+
+CAFE_PHOTOS = [
+    "photo-1554118811-1e0d58224f24",  # cafe
+    "photo-1445116572660-236099ec97a0",  # coffee
+    "photo-1498804103079-a6351b050096",  # brunch
+    "photo-1501339847302-ac426a4a7cbb"   # dessert
+]
+
+GENERIC_PHOTOS = [
+    "photo-1517248135467-4c7edcad34c4",  # table
+    "photo-1552566626-52f8b828add9",  # romantic
+    "photo-1414235077428-338989a2e8c0",  # fine dining
+    "photo-1559339352-11d035aa65de"   # outdoor
+]
+
+# Helper to strip all leading/trailing whitespace of every HTML line, preventing markdown code blocks
+def clean_html(html_str: str) -> str:
+    return "\n".join(line.strip() for line in html_str.splitlines())
+
 # 2. Helpers for Mock Enrichment
 def get_cuisine_image(cuisine: str, index: int) -> str:
     c = (cuisine or '').lower()
     if any(x in c for x in ['italian', 'pizza', 'pasta']):
-        return f"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80&sig={index}"
-    if any(x in c for x in ['indian', 'biryani', 'kebab', 'curry']):
-        return f"https://images.unsplash.com/photo-1585938338392-50a599e0217b?w=800&q=80&sig={index}"
-    if any(x in c for x in ['asian', 'chinese', 'thai', 'sushi']):
-        return f"https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80&sig={index}"
-    if any(x in c for x in ['cafe', 'bakery', 'dessert', 'coffee']):
-        return f"https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80&sig={index}"
-    if any(x in c for x in ['burger', 'fast food', 'american']):
-        return f"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80&sig={index}"
-    return f"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80&sig={index}"
+        photo = ITALIAN_PHOTOS[index % len(ITALIAN_PHOTOS)]
+    elif any(x in c for x in ['indian', 'biryani', 'kebab', 'curry']):
+        photo = INDIAN_PHOTOS[index % len(INDIAN_PHOTOS)]
+    elif any(x in c for x in ['asian', 'chinese', 'thai', 'sushi']):
+        photo = ASIAN_PHOTOS[index % len(ASIAN_PHOTOS)]
+    elif any(x in c for x in ['cafe', 'bakery', 'dessert', 'coffee']):
+        photo = CAFE_PHOTOS[index % len(CAFE_PHOTOS)]
+    else:
+        photo = GENERIC_PHOTOS[index % len(GENERIC_PHOTOS)]
+    return f"https://images.unsplash.com/{photo}?w=800&q=80"
 
 def get_popular_dishes(cuisine: str) -> list[str]:
     c = (cuisine or '').lower()
@@ -215,7 +257,7 @@ if st.session_state.view == "search":
     col_left, col_mid, col_right = st.columns([1, 6, 1])
     
     with col_mid:
-        st.markdown(textwrap.dedent("""
+        st.markdown(clean_html("""
             <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: center; padding-top: 40px;'>
                 <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
                     <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
@@ -345,7 +387,7 @@ elif st.session_state.view == "results":
     
     # AI Summary Banner
     if st.session_state.ai_summary:
-        st.markdown(textwrap.dedent(f"""
+        st.markdown(clean_html(f"""
             <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
                 <div style='display: flex; gap: 12px; align-items: start;'>
                     <span style='font-size: 1.2rem; color: #10b981;'>✨</span>
@@ -373,8 +415,8 @@ elif st.session_state.view == "results":
                 if i + j < len(recs):
                     item = recs[i+j]
                     with cols[j]:
-                        # Card markup (dedented to avoid code blocks in markdown)
-                        st.markdown(textwrap.dedent(f"""
+                        # Card markup (cleaned of leading whitespaces to prevent markdown parser codeblocks)
+                        st.markdown(clean_html(f"""
                             <div style='border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; background: rgba(30, 41, 59, 0.7); position: relative; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                                 <div style='position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #f97316); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white !important; z-index: 10;'>
                                     #{item['rank']}
@@ -427,7 +469,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
         
     st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
     
-    st.markdown(textwrap.dedent(f"""
+    st.markdown(clean_html(f"""
         <div style='height: 320px; border-radius: 16px; overflow: hidden; position: relative; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
             <img src='{item['image']}' style='width: 100%; height: 100%; object-fit: cover;' />
             <div style='position: absolute; inset: 0; background: linear-gradient(to top, #0f172a 15%, rgba(15,23,42,0.3) 100%);'></div>
@@ -454,7 +496,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
     col_left, col_right = st.columns([2, 1])
     
     with col_left:
-        st.markdown(textwrap.dedent(f"""
+        st.markdown(clean_html(f"""
             <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                 <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Ambiance & Features</h3>
                 <div style='display: flex; flex-wrap: wrap; gap: 10px;'>
@@ -463,7 +505,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
             </div>
         """), unsafe_allow_html=True)
         
-        st.markdown(textwrap.dedent(f"""
+        st.markdown(clean_html(f"""
             <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
                 <div style='display: flex; gap: 12px; align-items: start;'>
                     <span style='font-size: 1.3rem; color: #10b981; margin-top: 2px;'>✨</span>
@@ -475,7 +517,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
             </div>
         """), unsafe_allow_html=True)
         
-        st.markdown(textwrap.dedent(f"""
+        st.markdown(clean_html(f"""
             <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                 <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Must-Try Dishes</h3>
                 <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;'>
@@ -490,7 +532,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
         """), unsafe_allow_html=True)
         
     with col_right:
-        st.markdown(textwrap.dedent(f"""
+        st.markdown(clean_html(f"""
             <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                 <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 20px;'>Details</h3>
                 

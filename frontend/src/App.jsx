@@ -69,25 +69,59 @@ const INITIAL_MOCK_DATA = [
   }
 ];
 
+const ITALIAN_PHOTOS = [
+  "photo-1546069901-ba9599a7e63c",
+  "photo-1513104890138-7c749659a591",
+  "photo-1551183053-bf91a1d81141",
+  "photo-1595295333158-4742f28fbd85",
+  "photo-1555396273-367ea4eb4db5"
+];
+
+const INDIAN_PHOTOS = [
+  "photo-1585938338392-50a599e0217b",
+  "photo-1601050690597-df056fb4ce78",
+  "photo-1565557623262-b51c2513a641",
+  "photo-1626777552726-4a6b54c97e46",
+  "photo-1589301760014-d929f3979dbc"
+];
+
+const ASIAN_PHOTOS = [
+  "photo-1563245372-f21724e3856d",
+  "photo-1540648639573-8c848de23f0a",
+  "photo-1552611052-33e04de081de",
+  "photo-1512058564366-18510be2db19"
+];
+
+const CAFE_PHOTOS = [
+  "photo-1554118811-1e0d58224f24",
+  "photo-1445116572660-236099ec97a0",
+  "photo-1498804103079-a6351b050096",
+  "photo-1501339847302-ac426a4a7cbb"
+];
+
+const GENERIC_PHOTOS = [
+  "photo-1517248135467-4c7edcad34c4",
+  "photo-1552566626-52f8b828add9",
+  "photo-1414235077428-338989a2e8c0",
+  "photo-1559339352-11d035aa65de"
+];
+
 // Helper to get cuisine-based images from Unsplash
 const getCuisineImage = (cuisine, index) => {
   const c = (cuisine || '').toLowerCase();
+  let photo = "";
   if (c.includes('italian') || c.includes('pizza') || c.includes('pasta')) {
-    return `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80&sig=${index}`;
+    photo = ITALIAN_PHOTOS[index % ITALIAN_PHOTOS.length];
+  } else if (c.includes('indian') || c.includes('biryani') || c.includes('kebab') || c.includes('curry')) {
+    photo = INDIAN_PHOTOS[index % INDIAN_PHOTOS.length];
+  } else if (c.includes('asian') || c.includes('chinese') || c.includes('thai') || c.includes('sushi')) {
+    photo = ASIAN_PHOTOS[index % ASIAN_PHOTOS.length];
+  } else if (c.includes('cafe') || c.includes('bakery') || c.includes('dessert') || c.includes('coffee')) {
+    photo = CAFE_PHOTOS[index % CAFE_PHOTOS.length];
+  } else {
+    photo = GENERIC_PHOTOS[index % GENERIC_PHOTOS.length];
   }
-  if (c.includes('indian') || c.includes('biryani') || c.includes('kebab') || c.includes('curry')) {
-    return `https://images.unsplash.com/photo-1585938338392-50a599e0217b?w=800&q=80&sig=${index}`;
-  }
-  if (c.includes('asian') || c.includes('chinese') || c.includes('thai') || c.includes('sushi')) {
-    return `https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&q=80&sig=${index}`;
-  }
-  if (c.includes('cafe') || c.includes('bakery') || c.includes('dessert') || c.includes('coffee')) {
-    return `https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80&sig=${index}`;
-  }
-  if (c.includes('burger') || c.includes('fast food') || c.includes('american')) {
-    return `https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80&sig=${index}`;
-  }
-  return `https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80&sig=${index}`;
+  return `https://images.unsplash.com/${photo}?w=800&q=80`;
 };
 
 // Helper to get popular dishes based on cuisine
