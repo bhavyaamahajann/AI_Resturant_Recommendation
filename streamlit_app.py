@@ -106,7 +106,6 @@ st.markdown("""
         box-shadow: 0 0 12px rgba(255, 91, 63, 0.8) !important;
         width: 16px !important;
         height: 16px !important;
-        top: -6px !important;
     }
     div[data-testid="stSlider"] div[aria-valuemax] {
         background: linear-gradient(to right, #ff3b30, #ff9500) !important;
@@ -258,15 +257,17 @@ if st.session_state.view == "search":
     
     with col_mid:
         st.markdown(clean_html("""
-            <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: center; padding-top: 40px;'>
-                <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
-                    <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
-                        <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
-                    </svg>
+            <div style='max-width: 800px; margin: 0 auto; padding-top: 40px; margin-bottom: 32px;'>
+                <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: flex-start;'>
+                    <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
+                            <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+                        </svg>
+                    </div>
+                    <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
                 </div>
-                <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
+                <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: left;'>AI-powered culinary intelligence for your perfect dining experience</p>
             </div>
-            <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: center; margin-bottom: 32px;'>AI-powered culinary intelligence for your perfect dining experience</p>
         """), unsafe_allow_html=True)
         
         with st.container(border=True):
