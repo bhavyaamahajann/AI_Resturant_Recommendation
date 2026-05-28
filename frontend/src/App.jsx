@@ -248,13 +248,15 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
-              <Sparkles className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#ff3b30] to-[#ff9500] flex items-center justify-center shadow-lg shadow-red-500/20">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-current">
+                <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+              </svg>
             </div>
-            <h1 className="text-3xl font-semibold text-white tracking-wide">FlavorIQ</h1>
+            <h1 className="text-3xl font-bold text-white tracking-wide">FlavorIQ</h1>
           </div>
-          <p className="text-slate-400 ml-13">AI-powered culinary intelligence for your perfect dining experience</p>
+          <p className="text-slate-400 text-sm leading-relaxed">AI-powered culinary intelligence for your perfect dining experience</p>
         </motion.div>
 
         {/* Global Error Banner */}
@@ -268,36 +270,35 @@ function App() {
           </motion.div>
         )}
 
-        {/* 1. Search View: Two-Column Layout (Matches Figma Prototype exactly) */}
+        {/* 1. Search View: Centered Form (Matches the user's uploaded mockup) */}
         {view === "search" && (
-          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6">
-            {/* Preferences Card (Left Column) */}
+          <div className="max-w-[800px] mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <form onSubmit={(e) => handleSubmit(e, false)} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 sticky top-8" style={{
-                background: "rgba(30, 41, 59, 0.7)",
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(244, 63, 94, 0.1)"
+              <form onSubmit={(e) => handleSubmit(e, false)} className="rounded-2xl p-8 border border-slate-700/60" style={{
+                background: "#1e2530",
+                boxShadow: "0 12px 40px rgba(0, 0, 0, 0.5)"
               }}>
-                <h2 className="text-lg font-semibold text-white mb-6">Preferences</h2>
+                <h2 className="text-xl font-bold text-white mb-6">Preferences</h2>
                 
                 {/* Location */}
                 <div className="mb-5">
-                  <label className="block text-sm text-slate-300 mb-2">Location</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-2">Location</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                     <select
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-700/50 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all appearance-none cursor-pointer"
+                      className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[#141a24] border border-[#2d3748]/80 text-white focus:outline-none focus:ring-1 focus:ring-orange-500/50 transition-all appearance-none cursor-pointer text-sm"
                     >
                       {locationsList.map((loc) => (
-                        <option key={loc} value={loc} className="bg-slate-800">{loc}</option>
+                        <option key={loc} value={loc} className="bg-[#141a24]">{loc}</option>
                       ))}
                     </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                       <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
@@ -307,35 +308,39 @@ function App() {
 
                 {/* Cuisine */}
                 <div className="mb-5">
-                  <label className="block text-sm text-slate-300 mb-2">Cuisine</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-2">Cuisine</label>
                   <div className="relative">
-                    <Utensils className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Utensils className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                       type="text"
                       value={cuisine}
                       onChange={(e) => setCuisine(e.target.value)}
                       placeholder="e.g. Italian, North Indian"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-700/50 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all"
+                      className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#141a24] border border-[#2d3748]/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500/50 transition-all text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Budget */}
                 <div className="mb-5">
-                  <label className="block text-sm text-slate-300 mb-3">Budget</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["low", "medium", "high"].map((tier) => (
+                  <label className="block text-xs font-semibold text-slate-400 mb-3">Budget</label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { value: "low", label: "Low" },
+                      { value: "medium", label: "Medium" },
+                      { value: "high", label: "High" }
+                    ].map((tier) => (
                       <button
-                        key={tier}
+                        key={tier.value}
                         type="button"
-                        onClick={() => setBudget(tier)}
-                        className={`py-2.5 px-4 rounded-xl capitalize transition-all duration-300 ${
-                          budget === tier
-                            ? "bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-lg shadow-rose-500/30 font-semibold"
-                            : "bg-slate-700/50 text-slate-300 border border-white/10 hover:border-white/20"
+                        onClick={() => setBudget(tier.value)}
+                        className={`py-3 px-4 rounded-2xl transition-all duration-300 text-sm ${
+                          budget === tier.value
+                            ? "bg-gradient-to-r from-[#ff3b30] to-[#ff9500] text-white shadow-lg shadow-red-500/30 font-semibold"
+                            : "bg-[#141a24] text-slate-400 border border-[#2d3748]/80 hover:border-slate-700 hover:text-slate-200"
                         }`}
                       >
-                        {tier}
+                        {tier.label}
                       </button>
                     ))}
                   </div>
@@ -343,10 +348,10 @@ function App() {
 
                 {/* Min Rating */}
                 <div className="mb-5">
-                  <label className="block text-sm text-slate-300 mb-3">
-                    Minimum Rating: <span className="text-white font-semibold">{minRating.toFixed(1)}</span>
+                  <label className="block text-xs font-semibold text-slate-400 mb-3">
+                    Minimum Rating: <span className="text-white font-bold">{minRating.toFixed(1)}</span>
                   </label>
-                  <div className="relative">
+                  <div className="relative flex items-center h-6">
                     <input
                       type="range"
                       min="0"
@@ -354,9 +359,9 @@ function App() {
                       step="0.1"
                       value={minRating}
                       onChange={(e) => setMinRating(parseFloat(e.target.value))}
-                      className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                      className="w-full h-1 rounded-full appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #f43f5e ${minRating / 5 * 100}%, rgba(71, 85, 105, 0.5) ${minRating / 5 * 100}%)`
+                        background: `linear-gradient(to right, #ff3b30 0%, #ff9500 ${minRating / 5 * 100}%, #283141 ${minRating / 5 * 100}%)`
                       }}
                     />
                   </div>
@@ -364,13 +369,13 @@ function App() {
 
                 {/* Extras */}
                 <div className="mb-6">
-                  <label className="block text-sm text-slate-300 mb-2">Extras (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-400 mb-2">Extras (Optional)</label>
                   <input
                     type="text"
                     value={extras}
                     onChange={(e) => setExtras(e.target.value)}
                     placeholder="e.g. outdoor seating, romantic"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-700/50 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all"
+                    className="w-full px-4 py-3 rounded-2xl bg-[#141a24] border border-[#2d3748]/80 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500/50 transition-all text-sm"
                   />
                 </div>
 
@@ -378,7 +383,7 @@ function App() {
                 <button
                   type="submit"
                   disabled={isLoading || isAiLoading}
-                  className="w-full py-3.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 text-white font-semibold hover:shadow-xl hover:shadow-rose-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#ff3b30] to-[#ff9500] text-white font-semibold shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/35 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -392,7 +397,7 @@ function App() {
                   type="button"
                   onClick={(e) => handleSubmit(e, true)}
                   disabled={isLoading || isAiLoading}
-                  className="w-full mt-3 py-3.5 rounded-full bg-slate-700/60 border border-white/10 text-white font-semibold hover:bg-slate-700/80 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full mt-4 py-3.5 rounded-full bg-[#1e2530] border border-slate-700/60 text-white font-semibold hover:bg-slate-800/80 hover:border-emerald-500/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                 >
                   {isAiLoading ? (
                     <>
@@ -401,89 +406,12 @@ function App() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-5 h-5 text-emerald-400" />
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
                       <span>Get AI Recommendations</span>
                     </>
                   )}
                 </button>
               </form>
-            </motion.div>
-
-            {/* Right Column: AI Summary & Feed (Matches Figma Prototype) */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="space-y-6"
-            >
-              {/* AI Summary Banner */}
-              {aiSummary && recommendations.length > 0 && (
-                <div
-                  className="rounded-2xl p-5 backdrop-blur-xl border border-emerald-500/20"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))",
-                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), 0 0 20px rgba(16, 185, 129, 0.1)"
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h3 className="text-emerald-400 font-semibold mb-1">AI Summary</h3>
-                      <p className="text-slate-300 text-sm leading-relaxed">{aiSummary}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Vertical list of recommendation cards */}
-              {recommendations.length > 0 && (
-                <div className="space-y-4">
-                  {recommendations.map((item, index) => (
-                    <motion.div
-                      key={item.restaurant_id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      whileHover={{ scale: 1.01 }}
-                      onClick={() => handleCardClick(item)}
-                      className="relative rounded-2xl p-6 backdrop-blur-xl border border-white/10 group hover:border-rose-500/50 transition-all duration-300 cursor-pointer"
-                      style={{
-                        background: "rgba(30, 41, 59, 0.7)",
-                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)"
-                      }}
-                    >
-                      {/* Rank Badge */}
-                      <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
-                        <span className="text-white font-bold">#{item.rank}</span>
-                      </div>
-
-                      <h3 className="text-2xl font-semibold text-white mb-4 pr-8">{item.name}</h3>
-
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <span className="px-3 py-1.5 rounded-full bg-slate-700/60 border border-white/10 text-sm text-slate-200 flex items-center gap-1.5">
-                          <Utensils className="w-3.5 h-3.5" />
-                          {item.cuisine}
-                        </span>
-                        <span className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-1.5">
-                          <Star className="w-3.5 h-3.5 fill-amber-400" />
-                          {item.rating.toFixed(1)}
-                        </span>
-                        <span className="px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-300 flex items-center gap-1.5">
-                          <DollarSign className="w-3.5 h-3.5" />
-                          ₹{item.estimated_cost} for two
-                        </span>
-                      </div>
-
-                      <div className="rounded-xl p-4 bg-slate-900/50 border-l-4 border-rose-500">
-                        <div className="flex items-start gap-2">
-                          <TrendingUp className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
-                          <p className="text-slate-300 text-sm leading-relaxed">{item.explanation}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
             </motion.div>
           </div>
         )}
