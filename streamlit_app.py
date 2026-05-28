@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+import textwrap
 from pathlib import Path
 
 # Copy Streamlit secrets to environment variables for pydantic-settings compatibility
@@ -37,15 +38,6 @@ st.markdown("""
     /* Hide Streamlit sidebar by default */
     section[data-testid="stSidebar"] {
         display: none !important;
-    }
-    
-    /* Card container styling */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #1e2530 !important;
-        border: 1px solid rgba(71, 85, 105, 0.4) !important;
-        border-radius: 16px !important;
-        padding: 32px !important;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
     }
     
     /* Style all text inputs */
@@ -118,41 +110,6 @@ st.markdown("""
     }
     div[data-testid="stSlider"] div[aria-valuemax] {
         background: linear-gradient(to right, #ff3b30, #ff9500) !important;
-    }
-    
-    /* Hide the radio button selection circle */
-    div[role="radiogroup"] [data-testid="stRadioCircle"] {
-        display: none !important;
-    }
-    /* Flex layouts for radio choices */
-    div[role="radiogroup"] {
-        display: flex !important;
-        gap: 16px !important;
-        width: 100% !important;
-    }
-    div[role="radiogroup"] label {
-        flex: 1 !important;
-        background-color: #141a24 !important;
-        border: 1px solid rgba(45, 55, 72, 0.8) !important;
-        padding: 12px 16px !important;
-        border-radius: 12px !important;
-        text-align: center !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-    div[role="radiogroup"] label:hover {
-        border-color: rgba(255, 91, 63, 0.5) !important;
-    }
-    /* Style the selected radio button label */
-    div[role="radiogroup"] label[data-checked="true"] {
-        background: linear-gradient(to right, #ff3b30, #ff9500) !important;
-        border: none !important;
-        color: white !important;
-        font-weight: 600 !important;
-        box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -228,14 +185,37 @@ if "ai_summary" not in st.session_state:
     st.session_state.ai_summary = ""
 if "warnings" not in st.session_state:
     st.session_state.warnings = []
+if "budget" not in st.session_state:
+    st.session_state.budget = "medium"
 
 # 5. Render Views
 # 5a. Search View
 if st.session_state.view == "search":
+    # Dynamic search-specific styles (restricts form wrapper width & styles budget columns)
+    st.markdown("""
+        <style>
+        /* Card container styling (only on search screen) */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #1e2530 !important;
+            border: 1px solid rgba(71, 85, 105, 0.4) !important;
+            border-radius: 16px !important;
+            padding: 32px !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+            max-width: 800px !important;
+            margin: 0 auto !important;
+        }
+        /* Style buttons inside columns (budget buttons) */
+        div[data-testid="column"] div.stButton > button {
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     col_left, col_mid, col_right = st.columns([1, 6, 1])
     
     with col_mid:
-        st.markdown("""
+        st.markdown(textwrap.dedent("""
             <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: center; padding-top: 40px;'>
                 <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
                     <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
@@ -245,7 +225,7 @@ if st.session_state.view == "search":
                 <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
             </div>
             <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: center; margin-bottom: 32px;'>AI-powered culinary intelligence for your perfect dining experience</p>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
         with st.container(border=True):
             st.markdown("<h2 style='margin-top:0; font-size: 1.5rem; font-weight: 700; color: white !important; margin-bottom: 24px;'>Preferences</h2>", unsafe_allow_html=True)
@@ -260,15 +240,24 @@ if st.session_state.view == "search":
             # Cuisine text input
             selected_cuisine = st.text_input("Cuisine", placeholder="e.g. Italian, North Indian")
             
-            # Budget horizontal radio button group
-            selected_budget = st.radio(
-                "Budget", 
-                options=[BudgetTier.LOW, BudgetTier.MEDIUM, BudgetTier.HIGH],
-                format_func=lambda x: x.value.capitalize(),
-                index=1,
-                horizontal=True
-            )
+            # Budget Native Button Selector in a 3-column row
+            st.markdown("<label class='block text-xs font-semibold mb-3' style='color:#cbd5e1; font-size:0.875rem;'>Budget</label>", unsafe_allow_html=True)
+            b_col1, b_col2, b_col3 = st.columns(3)
+            with b_col1:
+                if st.button("Low", key="btn_budget_low", type="primary" if st.session_state.budget == "low" else "secondary", use_container_width=True):
+                    st.session_state.budget = "low"
+                    st.rerun()
+            with b_col2:
+                if st.button("Medium", key="btn_budget_medium", type="primary" if st.session_state.budget == "medium" else "secondary", use_container_width=True):
+                    st.session_state.budget = "medium"
+                    st.rerun()
+            with b_col3:
+                if st.button("High", key="btn_budget_high", type="primary" if st.session_state.budget == "high" else "secondary", use_container_width=True):
+                    st.session_state.budget = "high"
+                    st.rerun()
             
+            st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
+
             # Minimum Rating slider
             min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
             
@@ -291,7 +280,7 @@ if st.session_state.view == "search":
                         
                         prefs = UserPreferences(
                             location=selected_location,
-                            budget=selected_budget,
+                            budget=BudgetTier(st.session_state.budget),
                             cuisines=cuisines_list,
                             min_rating=min_rating,
                             extras=extras_list,
@@ -356,7 +345,7 @@ elif st.session_state.view == "results":
     
     # AI Summary Banner
     if st.session_state.ai_summary:
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
             <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
                 <div style='display: flex; gap: 12px; align-items: start;'>
                     <span style='font-size: 1.2rem; color: #10b981;'>✨</span>
@@ -366,7 +355,7 @@ elif st.session_state.view == "results":
                     </div>
                 </div>
             </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
     # Warnings Banner
     if st.session_state.warnings:
@@ -384,48 +373,44 @@ elif st.session_state.view == "results":
                 if i + j < len(recs):
                     item = recs[i+j]
                     with cols[j]:
-                        # Card markup
-                        st.markdown(f"""
+                        # Card markup (dedented to avoid code blocks in markdown)
+                        st.markdown(textwrap.dedent(f"""
                             <div style='border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; background: rgba(30, 41, 59, 0.7); position: relative; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                                 <div style='position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #f97316); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white !important; z-index: 10;'>
-                                    #{item["rank"]}
+                                    #{item['rank']}
                                 </div>
                                 <div style='height: 180px; width: 100%; overflow: hidden; position: relative;'>
-                                    <img src='{item["image"]}' style='width: 100%; height: 100%; object-fit: cover;' />
+                                    <img src='{item['image']}' style='width: 100%; height: 100%; object-fit: cover;' />
                                     <div style='position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%);'></div>
                                 </div>
                                 <div style='padding: 20px;'>
-                                    <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: white;'>{item["name"]}</h3>
-                                    
+                                    <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: white;'>{item['name']}</h3>
                                     <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
                                         <span style='color: #fbbf24; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
-                                            ⭐ {item["rating"]:.1f} <span style='color: #64748b; font-size: 0.75rem; font-weight: 400;'>({item["reviewCount"]})</span>
+                                            ⭐ {item['rating']:.1f} <span style='color: #64748b; font-size: 0.75rem; font-weight: 400;'>({item['reviewCount']})</span>
                                         </span>
                                         <span style='color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;'>
-                                            📍 {item["distance"]}
+                                            📍 {item['distance']}
                                         </span>
                                     </div>
-                                    
                                     <div style='display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;'>
                                         <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #e2e8f0;'>
-                                            {item["cuisine"]}
+                                            {item['cuisine']}
                                         </span>
                                         <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; color: #34d399;'>
-                                            ₹{item["estimated_cost"]:.0f} for two
+                                            ₹{item['estimated_cost']:.0f} for two
                                         </span>
                                     </div>
-                                    
                                     <div style='margin-bottom: 12px;'>
                                         <span style='font-size: 0.75rem; color: #64748b; display: block; margin-bottom: 2px;'>Popular:</span>
-                                        <p style='margin: 0; font-size: 0.85rem; color: #cbd5e1;'>{", ".join(item["popularDishes"])}</p>
+                                        <p style='margin: 0; font-size: 0.85rem; color: #cbd5e1;'>{", ".join(item['popularDishes'])}</p>
                                     </div>
-                                    
                                     <div style='display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;'>
-                                        {" ".join([f'<span style="padding: 2px 6px; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.15); font-size: 0.7rem; color: #f43f5e;">{tag}</span>' for tag in item["ambiance"]])}
+                                        {" ".join([f'<span style="padding: 2px 6px; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.15); font-size: 0.7rem; color: #f43f5e;">{tag}</span>' for tag in item['ambiance']])}
                                     </div>
                                 </div>
                             </div>
-                        """, unsafe_allow_html=True)
+                        """), unsafe_allow_html=True)
                         if st.button("View Details", key=f"btn_details_{item['restaurant_id']}", use_container_width=True):
                             st.session_state.selected_item = item
                             st.session_state.view = "detail"
@@ -442,55 +427,55 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
         
     st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
     
-    st.markdown(f"""
+    st.markdown(textwrap.dedent(f"""
         <div style='height: 320px; border-radius: 16px; overflow: hidden; position: relative; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
-            <img src='{item["image"]}' style='width: 100%; height: 100%; object-fit: cover;' />
+            <img src='{item['image']}' style='width: 100%; height: 100%; object-fit: cover;' />
             <div style='position: absolute; inset: 0; background: linear-gradient(to top, #0f172a 15%, rgba(15,23,42,0.3) 100%);'></div>
             <div style='position: absolute; bottom: 24px; left: 24px;'>
                 <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 8px;'>
-                    <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700;'>{item["name"]}</h1>
+                    <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700;'>{item['name']}</h1>
                     <div style='padding: 4px 12px; border-radius: 9999px; background: linear-gradient(135deg, #f43f5e, #f97316); color: white !important; font-weight: bold; font-size: 0.9rem;'>
-                        #{item["rank"]}
+                        #{item['rank']}
                     </div>
                 </div>
                 <div style='display: flex; align-items: center; gap: 16px; font-size: 0.95rem; color: #cbd5e1;'>
                     <span style='color: #fbbf24; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
-                        ⭐ {item["rating"]:.1f} <span style='color: #94a3b8; font-weight: 400;'>({item["reviewCount"]} reviews)</span>
+                        ⭐ {item['rating']:.1f} <span style='color: #94a3b8; font-weight: 400;'>({item['reviewCount']} reviews)</span>
                     </span>
                     <span>•</span>
-                    <span>{item["cuisine"]}</span>
+                    <span>{item['cuisine']}</span>
                     <span>•</span>
-                    <span style='color: #34d399; font-weight: 600;'>₹{item["estimated_cost"]:.0f} for two</span>
+                    <span style='color: #34d399; font-weight: 600;'>₹{item['estimated_cost']:.0f} for two</span>
                 </div>
             </div>
         </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
     
     col_left, col_right = st.columns([2, 1])
     
     with col_left:
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
             <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                 <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Ambiance & Features</h3>
                 <div style='display: flex; flex-wrap: wrap; gap: 10px;'>
-                    {" ".join([f'<span style="padding: 6px 14px; border-radius: 9999px; background: linear-gradient(to right, rgba(244,63,94,0.15), rgba(249,115,22,0.15)); border: 1px solid rgba(244,63,94,0.25); color: #fecdd3; font-weight: 500; font-size: 0.85rem;">{tag}</span>' for tag in item["ambiance"]])}
+                    {" ".join([f'<span style="padding: 6px 14px; border-radius: 9999px; background: linear-gradient(to right, rgba(244,63,94,0.15), rgba(249,115,22,0.15)); border: 1px solid rgba(244,63,94,0.25); color: #fecdd3; font-weight: 500; font-size: 0.85rem;">{tag}</span>' for tag in item['ambiance']])}
                 </div>
             </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
             <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
                 <div style='display: flex; gap: 12px; align-items: start;'>
                     <span style='font-size: 1.3rem; color: #10b981; margin-top: 2px;'>✨</span>
                     <div>
                         <h3 style='margin: 0 0 8px 0; color: #10b981 !important; font-size: 1.2rem; font-weight: 600;'>Why AI Recommends This</h3>
-                        <p style='margin: 0; color: #e2e8f0 !important; font-size: 0.95rem; line-height: 1.6; font-style: italic;'>"{item["explanation"]}"</p>
+                        <p style='margin: 0; color: #e2e8f0 !important; font-size: 0.95rem; line-height: 1.6; font-style: italic;'>"{item['explanation']}"</p>
                     </div>
                 </div>
             </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
             <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                 <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Must-Try Dishes</h3>
                 <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;'>
@@ -499,13 +484,13 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
                             <span style='font-size: 1.1rem; display: block; margin-bottom: 6px;'>🍽️</span>
                             <span style='color: white; font-weight: 500; font-size: 0.9rem;'>{dish}</span>
                         </div>
-                    ''' for dish in item["popularDishes"]])}
+                    ''' for dish in item['popularDishes']])}
                 </div>
             </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
     with col_right:
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
             <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
                 <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 20px;'>Details</h3>
                 
@@ -513,7 +498,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
                     <span style='color: #f43f5e; font-size: 1.1rem;'>📍</span>
                     <div>
                         <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Address</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["address"]}</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['address']}</span>
                     </div>
                 </div>
                 
@@ -521,7 +506,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
                     <span style='color: #f97316; font-size: 1.1rem;'>🧭</span>
                     <div>
                         <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Distance</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["distance"]} away</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['distance']} away</span>
                     </div>
                 </div>
                 
@@ -529,7 +514,7 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
                     <span style='color: #10b981; font-size: 1.1rem;'>📞</span>
                     <div>
                         <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Phone</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["phone"]}</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['phone']}</span>
                     </div>
                 </div>
                 
@@ -537,11 +522,11 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
                     <span style='color: #3b82f6; font-size: 1.1rem;'>🕒</span>
                     <div>
                         <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Hours</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item["hours"]}</span>
+                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['hours']}</span>
                     </div>
                 </div>
             </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
         st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
         reserve_btn = st.button("Reserve Table", use_container_width=True, type="primary")
