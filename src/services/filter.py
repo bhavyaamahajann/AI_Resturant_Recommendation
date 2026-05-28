@@ -134,7 +134,7 @@ class CandidateFilterService:
         )
 
         return CandidateList(
-            preferences=preferences,
+            preferences=preferences.model_dump() if hasattr(preferences, "model_dump") else preferences,
             restaurants=capped,
             metadata=metadata,
         )
