@@ -49,9 +49,10 @@ async def health_check(service: RecommendationService = Depends(get_recommendati
 
 @router.get("/api/v1/locations")
 async def list_locations(service: RecommendationService = Depends(get_recommendation_service)):
-    """Return distinct area/neighborhood names for the location dropdown."""
+    """Return 'Bangalore' followed by distinct area/neighborhood names for the location dropdown."""
     areas = service._store.known_areas(limit=200)
-    return {"locations": areas}
+    locations = ["Bangalore"] + [a for a in areas if a.lower() != "bangalore"]
+    return {"locations": locations}
 
 
 @router.get("/api/v1/cuisines")

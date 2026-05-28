@@ -116,6 +116,7 @@ const getAmbiance = (rating, cost) => {
 
 function App() {
   const [view, setView] = useState("search"); // "search" | "results" | "detail"
+  const [previousView, setPreviousView] = useState("search");
   const [selectedItem, setSelectedItem] = useState(null);
   const [location, setLocation] = useState("Bangalore");
   const [cuisine, setCuisine] = useState("");
@@ -205,11 +206,7 @@ function App() {
       setAiSummary(data.summary || "");
       setWarnings(data.metadata?.warnings || []);
       
-      if (forceAi) {
-        setView("search"); // Streamlit workflow showing list below the form
-      } else {
-        setView("results"); // Show the grid layout page
-      }
+      setView("results"); // Transition to results view on both submit types
     } catch (err) {
       console.error(err);
       setError(err.message || "Something went wrong.");
@@ -220,12 +217,13 @@ function App() {
   };
 
   const handleCardClick = (item) => {
+    setPreviousView(view);
     setSelectedItem(item);
     setView("detail");
   };
 
   const handleBackToResults = () => {
-    setView("results");
+    setView(previousView);
     setSelectedItem(null);
   };
 
@@ -270,16 +268,16 @@ function App() {
           </motion.div>
         )}
 
-        {/* 1. Search View: Centered Stack Layout (Matches Image 1) */}
+        {/* 1. Search View: Two-Column Layout (Matches Figma Prototype exactly) */}
         {view === "search" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* Preferences Card */}
+          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6">
+            {/* Preferences Card (Left Column) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <form onSubmit={(e) => handleSubmit(e, false)} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10" style={{
+              <form onSubmit={(e) => handleSubmit(e, false)} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 sticky top-8" style={{
                 background: "rgba(30, 41, 59, 0.7)",
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(244, 63, 94, 0.1)"
               }}>
@@ -411,76 +409,82 @@ function App() {
               </form>
             </motion.div>
 
-            {/* AI Summary Banner (Displayed below the form on search page) */}
-            {aiSummary && recommendations.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl p-5 backdrop-blur-xl border border-emerald-500/20"
-                style={{
-                  background: "linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), 0 0 20px rgba(16, 185, 129, 0.1)"
-                }}
-              >
-                <div className="flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-emerald-400 font-semibold mb-1">AI Summary</h3>
-                    <p className="text-slate-300 text-sm leading-relaxed">{aiSummary}</p>
+            {/* Right Column: AI Summary & Feed (Matches Figma Prototype) */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-6"
+            >
+              {/* AI Summary Banner */}
+              {aiSummary && recommendations.length > 0 && (
+                <div
+                  className="rounded-2xl p-5 backdrop-blur-xl border border-emerald-500/20"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))",
+                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), 0 0 20px rgba(16, 185, 129, 0.1)"
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h3 className="text-emerald-400 font-semibold mb-1">AI Summary</h3>
+                      <p className="text-slate-300 text-sm leading-relaxed">{aiSummary}</p>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            )}
+              )}
 
-            {/* Vertical list of recommendation cards (Matches Image 1) */}
-            {recommendations.length > 0 && (
-              <div className="space-y-4">
-                {recommendations.map((item, index) => (
-                  <motion.div
-                    key={item.restaurant_id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                    whileHover={{ scale: 1.01 }}
-                    onClick={() => handleCardClick(item)}
-                    className="relative rounded-2xl p-6 backdrop-blur-xl border border-white/10 group hover:border-rose-500/50 transition-all duration-300 cursor-pointer"
-                    style={{
-                      background: "rgba(30, 41, 59, 0.7)",
-                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)"
-                    }}
-                  >
-                    {/* Rank Badge */}
-                    <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
-                      <span className="text-white font-bold">#{item.rank}</span>
-                    </div>
-
-                    <h3 className="text-2xl font-semibold text-white mb-4 pr-8">{item.name}</h3>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="px-3 py-1.5 rounded-full bg-slate-700/60 border border-white/10 text-sm text-slate-200 flex items-center gap-1.5">
-                        <Utensils className="w-3.5 h-3.5" />
-                        {item.cuisine}
-                      </span>
-                      <span className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-1.5">
-                        <Star className="w-3.5 h-3.5 fill-amber-400" />
-                        {item.rating.toFixed(1)}
-                      </span>
-                      <span className="px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-300 flex items-center gap-1.5">
-                        <DollarSign className="w-3.5 h-3.5" />
-                        ₹{item.estimated_cost} for two
-                      </span>
-                    </div>
-
-                    <div className="rounded-xl p-4 bg-slate-900/50 border-l-4 border-rose-500">
-                      <div className="flex items-start gap-2">
-                        <TrendingUp className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-slate-300 text-sm leading-relaxed">{item.explanation}</p>
+              {/* Vertical list of recommendation cards */}
+              {recommendations.length > 0 && (
+                <div className="space-y-4">
+                  {recommendations.map((item, index) => (
+                    <motion.div
+                      key={item.restaurant_id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + index * 0.1 }}
+                      whileHover={{ scale: 1.01 }}
+                      onClick={() => handleCardClick(item)}
+                      className="relative rounded-2xl p-6 backdrop-blur-xl border border-white/10 group hover:border-rose-500/50 transition-all duration-300 cursor-pointer"
+                      style={{
+                        background: "rgba(30, 41, 59, 0.7)",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)"
+                      }}
+                    >
+                      {/* Rank Badge */}
+                      <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                        <span className="text-white font-bold">#{item.rank}</span>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+
+                      <h3 className="text-2xl font-semibold text-white mb-4 pr-8">{item.name}</h3>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <span className="px-3 py-1.5 rounded-full bg-slate-700/60 border border-white/10 text-sm text-slate-200 flex items-center gap-1.5">
+                          <Utensils className="w-3.5 h-3.5" />
+                          {item.cuisine}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-1.5">
+                          <Star className="w-3.5 h-3.5 fill-amber-400" />
+                          {item.rating.toFixed(1)}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-300 flex items-center gap-1.5">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          ₹{item.estimated_cost} for two
+                        </span>
+                      </div>
+
+                      <div className="rounded-xl p-4 bg-slate-900/50 border-l-4 border-rose-500">
+                        <div className="flex items-start gap-2">
+                          <TrendingUp className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+                          <p className="text-slate-300 text-sm leading-relaxed">{item.explanation}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
           </div>
         )}
 
