@@ -46,4 +46,6 @@ class RecommendationService:
             return LLMParser.parse_and_enrich(llm_response, candidates, preferences)
         except LLMError as e:
             # Deterministic fallback per architecture guidelines when LLM fails
-            return LLMParser.deterministic_fallback(candidates, preferences)
+            res = LLMParser.deterministic_fallback(candidates, preferences)
+            res.metadata.warnings.append(f"AI error: {str(e)}")
+            return res

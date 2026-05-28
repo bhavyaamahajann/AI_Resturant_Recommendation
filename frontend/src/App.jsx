@@ -18,6 +18,57 @@ import {
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
+const INITIAL_MOCK_DATA = [
+  {
+    rank: 1,
+    name: "Toscano",
+    cuisine: "Italian",
+    rating: 4.4,
+    estimated_cost: 1500,
+    explanation: "We recommend Toscano because it perfectly matches your request for Italian cuisine in Bangalore with excellent outdoor seating and a romantic ambiance. The restaurant has consistently high ratings and offers authentic Italian dishes prepared by experienced chefs.",
+    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+    address: "45 MG Road, Bangalore, Karnataka 560001",
+    phone: "+91 80 4567 8901",
+    hours: "12:00 PM - 11:00 PM",
+    distance: "2.3 km",
+    reviewCount: 342,
+    popularDishes: ["Truffle Pasta", "Margherita Pizza", "Tiramisu"],
+    ambiance: ["Romantic", "Outdoor Seating", "Fine Dining"]
+  },
+  {
+    rank: 2,
+    name: "Chianti",
+    cuisine: "Italian",
+    rating: 4.3,
+    estimated_cost: 1400,
+    explanation: "Chianti offers a sophisticated Italian dining experience with a beautiful terrace setup, ideal for romantic evenings. Their wine selection complements their traditional Italian menu perfectly, and the pricing aligns well with your budget expectations.",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
+    address: "78 Indiranagar, Bangalore, Karnataka 560038",
+    phone: "+91 80 4567 8902",
+    hours: "11:30 AM - 10:30 PM",
+    distance: "3.1 km",
+    reviewCount: 289,
+    popularDishes: ["Risotto", "Bruschetta", "Panna Cotta"],
+    ambiance: ["Terrace", "Wine Bar", "Intimate"]
+  },
+  {
+    rank: 3,
+    name: "Olive Garden Bistro",
+    cuisine: "Italian",
+    rating: 4.2,
+    estimated_cost: 1300,
+    explanation: "This charming bistro provides an intimate setting with outdoor seating options. Known for their fresh pasta and attentive service, they create a perfect atmosphere for special occasions while maintaining excellent value for money.",
+    image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&q=80",
+    address: "12 Koramangala, Bangalore, Karnataka 560034",
+    phone: "+91 80 4567 8903",
+    hours: "12:30 PM - 11:30 PM",
+    distance: "1.8 km",
+    reviewCount: 421,
+    popularDishes: ["Lasagna", "Garlic Bread", "Gelato"],
+    ambiance: ["Casual", "Family Friendly", "Garden Seating"]
+  }
+];
+
 // Helper to get cuisine-based images from Unsplash
 const getCuisineImage = (cuisine, index) => {
   const c = (cuisine || '').toLowerCase();
@@ -76,8 +127,8 @@ function App() {
   const [error, setError] = useState(null);
   
   const [locationsList, setLocationsList] = useState(["Bangalore", "Mumbai", "Delhi", "Pune", "Hyderabad", "Chennai", "Kolkata"]);
-  const [recommendations, setRecommendations] = useState([]);
-  const [aiSummary, setAiSummary] = useState("");
+  const [recommendations, setRecommendations] = useState(INITIAL_MOCK_DATA);
+  const [aiSummary, setAiSummary] = useState("Found 3 top-rated dining spots perfect for a romantic Italian evening with outdoor seating options in Bangalore. All selections feature ratings above 4.0 and align with your budget preferences.");
   const [warnings, setWarnings] = useState([]);
 
   // Load locations on mount
@@ -87,7 +138,6 @@ function App() {
       .then(data => {
         if (data.locations && data.locations.length > 0) {
           setLocationsList(data.locations);
-          // Set first location as default
           setLocation(data.locations[0]);
         }
       })
@@ -155,8 +205,11 @@ function App() {
       setAiSummary(data.summary || "");
       setWarnings(data.metadata?.warnings || []);
       
-      // Navigate to results
-      setView("results");
+      if (forceAi) {
+        setView("search"); // Streamlit workflow showing list below the form
+      } else {
+        setView("results"); // Show the grid layout page
+      }
     } catch (err) {
       console.error(err);
       setError(err.message || "Something went wrong.");
@@ -211,22 +264,22 @@ function App() {
           <motion.div 
             initial={{ opacity: 0, y: -10 }} 
             animate={{ opacity: 1, y: 0 }} 
-            className="mb-6 rounded-xl p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2"
+            className="mb-6 rounded-xl p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2 max-w-4xl mx-auto"
           >
             <span>⚠️ {error}</span>
           </motion.div>
         )}
 
-        {/* 1. Search View */}
+        {/* 1. Search View: Centered Stack Layout (Matches Image 1) */}
         {view === "search" && (
-          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-6">
-            {/* Sidebar form */}
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Preferences Card */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <form onSubmit={(e) => handleSubmit(e, false)} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 sticky top-8" style={{
+              <form onSubmit={(e) => handleSubmit(e, false)} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10" style={{
                 background: "rgba(30, 41, 59, 0.7)",
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(244, 63, 94, 0.1)"
               }}>
@@ -358,22 +411,80 @@ function App() {
               </form>
             </motion.div>
 
-            {/* Empty view on right */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-col items-center justify-center p-12 rounded-2xl border border-white/10 text-center"
-              style={{ background: "rgba(30, 41, 59, 0.4)" }}
-            >
-              <Utensils className="w-16 h-16 text-slate-500 mb-4 animate-bounce" />
-              <h3 className="text-xl font-medium text-white mb-2">Ready to Discover?</h3>
-              <p className="text-slate-400 max-w-md">Configure your preferences on the left and submit to find the absolute best-suited restaurants powered by our recommendation engine.</p>
-            </motion.div>
+            {/* AI Summary Banner (Displayed below the form on search page) */}
+            {aiSummary && recommendations.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-2xl p-5 backdrop-blur-xl border border-emerald-500/20"
+                style={{
+                  background: "linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), 0 0 20px rgba(16, 185, 129, 0.1)"
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-emerald-400 font-semibold mb-1">AI Summary</h3>
+                    <p className="text-slate-300 text-sm leading-relaxed">{aiSummary}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Vertical list of recommendation cards (Matches Image 1) */}
+            {recommendations.length > 0 && (
+              <div className="space-y-4">
+                {recommendations.map((item, index) => (
+                  <motion.div
+                    key={item.restaurant_id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    whileHover={{ scale: 1.01 }}
+                    onClick={() => handleCardClick(item)}
+                    className="relative rounded-2xl p-6 backdrop-blur-xl border border-white/10 group hover:border-rose-500/50 transition-all duration-300 cursor-pointer"
+                    style={{
+                      background: "rgba(30, 41, 59, 0.7)",
+                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)"
+                    }}
+                  >
+                    {/* Rank Badge */}
+                    <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                      <span className="text-white font-bold">#{item.rank}</span>
+                    </div>
+
+                    <h3 className="text-2xl font-semibold text-white mb-4 pr-8">{item.name}</h3>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="px-3 py-1.5 rounded-full bg-slate-700/60 border border-white/10 text-sm text-slate-200 flex items-center gap-1.5">
+                        <Utensils className="w-3.5 h-3.5" />
+                        {item.cuisine}
+                      </span>
+                      <span className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-1.5">
+                        <Star className="w-3.5 h-3.5 fill-amber-400" />
+                        {item.rating.toFixed(1)}
+                      </span>
+                      <span className="px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-300 flex items-center gap-1.5">
+                        <DollarSign className="w-3.5 h-3.5" />
+                        ₹{item.estimated_cost} for two
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl p-4 bg-slate-900/50 border-l-4 border-rose-500">
+                      <div className="flex items-start gap-2">
+                        <TrendingUp className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-slate-300 text-sm leading-relaxed">{item.explanation}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* 2. Results View */}
+        {/* 2. Results View: 3-Column Grid Layout with Images (Matches Image 3) */}
         {view === "results" && (
           <div>
             <button
@@ -495,7 +606,7 @@ function App() {
           </div>
         )}
 
-        {/* 3. Detail View */}
+        {/* 3. Detail View: Detailed Info with Left and Right Panels (Matches Image 2) */}
         {view === "detail" && selectedItem && (
           <div>
             <button
