@@ -235,6 +235,13 @@ if st.session_state.view == "search":
     # Dynamic search-specific styles (restricts form wrapper width & styles budget columns)
     st.markdown("""
         <style>
+        /* Restrict main container width & top padding only on search view */
+        .block-container {
+            max-width: 800px !important;
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+            margin: 0 auto !important;
+        }
         /* Card container styling (only on search screen) */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #1e2530 !important;
@@ -242,8 +249,7 @@ if st.session_state.view == "search":
             border-radius: 16px !important;
             padding: 32px !important;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
-            max-width: 800px !important;
-            margin: 0 auto !important;
+            width: 100% !important;
         }
         /* Style buttons inside columns (budget buttons) */
         div[data-testid="column"] div.stButton > button {
@@ -253,129 +259,125 @@ if st.session_state.view == "search":
         </style>
     """, unsafe_allow_html=True)
 
-    col_left, col_mid, col_right = st.columns([1, 6, 1])
-    
-    with col_mid:
-        st.markdown(clean_html("""
-            <div style='max-width: 800px; margin: 0 auto; padding-top: 40px; margin-bottom: 32px;'>
-                <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: flex-start;'>
-                    <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
-                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
-                            <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
-                        </svg>
-                    </div>
-                    <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
-                </div>
-                <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: left;'>AI-powered culinary intelligence for your perfect dining experience</p>
+    # Render header directly (no columns, centered container with max-width 800px)
+    st.markdown(clean_html("""
+        <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: flex-start; padding-top: 0px;'>
+            <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: white; color: white;">
+                    <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
+                </svg>
             </div>
-        """), unsafe_allow_html=True)
+            <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
+        </div>
+        <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: left; margin-bottom: 32px;'>AI-powered culinary intelligence for your perfect dining experience</p>
+    """), unsafe_allow_html=True)
+    
+    with st.container(border=True):
+        st.markdown("<h2 style='margin-top:0; font-size: 1.5rem; font-weight: 700; color: white !important; margin-bottom: 24px;'>Preferences</h2>", unsafe_allow_html=True)
         
-        with st.container(border=True):
-            st.markdown("<h2 style='margin-top:0; font-size: 1.5rem; font-weight: 700; color: white !important; margin-bottom: 24px;'>Preferences</h2>", unsafe_allow_html=True)
-            
-            # Location dropdown
-            locations = store.known_locations(limit=100)
-            if "Bangalore" in locations:
-                locations.remove("Bangalore")
-                locations = ["Bangalore"] + locations
-            selected_location = st.selectbox("Location", options=locations)
-            
-            # Cuisine text input
-            selected_cuisine = st.text_input("Cuisine", placeholder="e.g. Italian, North Indian")
-            
-            # Budget Native Button Selector in a 3-column row
-            st.markdown("<label class='block text-xs font-semibold mb-3' style='color:#cbd5e1; font-size:0.875rem;'>Budget</label>", unsafe_allow_html=True)
-            b_col1, b_col2, b_col3 = st.columns(3)
-            with b_col1:
-                if st.button("Low", key="btn_budget_low", type="primary" if st.session_state.budget == "low" else "secondary", use_container_width=True):
-                    st.session_state.budget = "low"
-                    st.rerun()
-            with b_col2:
-                if st.button("Medium", key="btn_budget_medium", type="primary" if st.session_state.budget == "medium" else "secondary", use_container_width=True):
-                    st.session_state.budget = "medium"
-                    st.rerun()
-            with b_col3:
-                if st.button("High", key="btn_budget_high", type="primary" if st.session_state.budget == "high" else "secondary", use_container_width=True):
-                    st.session_state.budget = "high"
-                    st.rerun()
-            
-            st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
+        # Location dropdown
+        locations = store.known_locations(limit=100)
+        if "Bangalore" in locations:
+            locations.remove("Bangalore")
+            locations = ["Bangalore"] + locations
+        selected_location = st.selectbox("Location", options=locations)
+        
+        # Cuisine text input
+        selected_cuisine = st.text_input("Cuisine", placeholder="e.g. Italian, North Indian")
+        
+        # Budget Native Button Selector in a 3-column row
+        st.markdown("<label class='block text-xs font-semibold mb-3' style='color:#cbd5e1; font-size:0.875rem;'>Budget</label>", unsafe_allow_html=True)
+        b_col1, b_col2, b_col3 = st.columns(3)
+        with b_col1:
+            if st.button("Low", key="btn_budget_low", type="primary" if st.session_state.budget == "low" else "secondary", use_container_width=True):
+                st.session_state.budget = "low"
+                st.rerun()
+        with b_col2:
+            if st.button("Medium", key="btn_budget_medium", type="primary" if st.session_state.budget == "medium" else "secondary", use_container_width=True):
+                st.session_state.budget = "medium"
+                st.rerun()
+        with b_col3:
+            if st.button("High", key="btn_budget_high", type="primary" if st.session_state.budget == "high" else "secondary", use_container_width=True):
+                st.session_state.budget = "high"
+                st.rerun()
+        
+        st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
 
-            # Minimum Rating slider
-            min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
-            
-            # Extras optional text input
-            extras_input = st.text_input("Extras (Optional)", placeholder="e.g. outdoor seating, romantic")
-            
-            st.markdown("<div style='margin-top: 24px;'></div>", unsafe_allow_html=True)
-            
-            # Actions buttons
-            find_btn = st.button("Find Recommendations", use_container_width=True, type="primary")
-            ai_btn = st.button("✨ Get AI Recommendations", use_container_width=True)
-            
-            if find_btn or ai_btn:
-                if not selected_cuisine:
-                    st.error("Please enter at least one cuisine.")
-                else:
-                    with st.spinner("AI is analyzing local matches..."):
-                        cuisines_list = [c.strip() for c in selected_cuisine.split(",") if c.strip()]
-                        extras_list = [e.strip() for e in extras_input.split(",") if e.strip()] if extras_input else []
+        # Minimum Rating slider
+        min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
+        
+        # Extras optional text input
+        extras_input = st.text_input("Extras (Optional)", placeholder="e.g. outdoor seating, romantic")
+        
+        st.markdown("<div style='margin-top: 24px;'></div>", unsafe_allow_html=True)
+        
+        # Actions buttons
+        find_btn = st.button("Find Recommendations", use_container_width=True, type="primary")
+        ai_btn = st.button("✨ Get AI Recommendations", use_container_width=True)
+        
+        if find_btn or ai_btn:
+            if not selected_cuisine:
+                st.error("Please enter at least one cuisine.")
+            else:
+                with st.spinner("AI is analyzing local matches..."):
+                    cuisines_list = [c.strip() for c in selected_cuisine.split(",") if c.strip()]
+                    extras_list = [e.strip() for e in extras_input.split(",") if e.strip()] if extras_input else []
+                    
+                    prefs = UserPreferences(
+                        location=selected_location,
+                        budget=BudgetTier(st.session_state.budget),
+                        cuisines=cuisines_list,
+                        min_rating=min_rating,
+                        extras=extras_list,
+                        top_n=9
+                    )
+                    
+                    try:
+                        result = service.recommend(prefs)
                         
-                        prefs = UserPreferences(
-                            location=selected_location,
-                            budget=BudgetTier(st.session_state.budget),
-                            cuisines=cuisines_list,
-                            min_rating=min_rating,
-                            extras=extras_list,
-                            top_n=9
-                        )
+                        # Enrich results
+                        enriched = []
+                        for i, rec in enumerate(result.recommendations):
+                            r_id = rec.restaurant_id
+                            mock_distance = f"{((int(r_id[:4], 16) % 35 + 10) / 10):.1f} km"
+                            mock_review_count = int(rec.rating * 74 + (int(r_id[4:6], 16) % 150))
+                            mock_phone = f"+91 80 4{(int(r_id[:6], 16) % 9000000 + 1000000)}"
+                            mock_address = f"{rec.name}, Locality Road, {selected_location}, India"
+                            
+                            orig_rest = store.get_by_id(r_id)
+                            if orig_rest and orig_rest.raw_attributes:
+                                mock_address = orig_rest.raw_attributes.get("address", mock_address)
+                                
+                            rec_item = {
+                                "rank": rec.rank,
+                                "restaurant_id": rec.restaurant_id,
+                                "name": rec.name,
+                                "cuisine": rec.cuisine,
+                                "rating": rec.rating,
+                                "estimated_cost": rec.estimated_cost or 500,
+                                "explanation": rec.explanation,
+                                "image": get_cuisine_image(rec.cuisine, i),
+                                "address": mock_address,
+                                "phone": mock_phone,
+                                "hours": "12:00 PM - 11:30 PM",
+                                "distance": mock_distance,
+                                "reviewCount": mock_review_count,
+                                "popularDishes": get_popular_dishes(rec.cuisine),
+                                "ambiance": get_ambiance_tags(rec.rating, rec.estimated_cost or 500)
+                            }
+                            enriched.append(rec_item)
+                            
+                        st.session_state.recommendations = enriched
+                        st.session_state.ai_summary = result.summary or ""
+                        st.session_state.warnings = result.metadata.warnings or []
+                        st.session_state.view = "results"
+                        st.session_state.previous_view = "search"
+                        st.rerun()
                         
-                        try:
-                            result = service.recommend(prefs)
-                            
-                            # Enrich results
-                            enriched = []
-                            for i, rec in enumerate(result.recommendations):
-                                r_id = rec.restaurant_id
-                                mock_distance = f"{((int(r_id[:4], 16) % 35 + 10) / 10):.1f} km"
-                                mock_review_count = int(rec.rating * 74 + (int(r_id[4:6], 16) % 150))
-                                mock_phone = f"+91 80 4{(int(r_id[:6], 16) % 9000000 + 1000000)}"
-                                mock_address = f"{rec.name}, Locality Road, {selected_location}, India"
-                                
-                                orig_rest = store.get_by_id(r_id)
-                                if orig_rest and orig_rest.raw_attributes:
-                                    mock_address = orig_rest.raw_attributes.get("address", mock_address)
-                                    
-                                rec_item = {
-                                    "rank": rec.rank,
-                                    "restaurant_id": rec.restaurant_id,
-                                    "name": rec.name,
-                                    "cuisine": rec.cuisine,
-                                    "rating": rec.rating,
-                                    "estimated_cost": rec.estimated_cost or 500,
-                                    "explanation": rec.explanation,
-                                    "image": get_cuisine_image(rec.cuisine, i),
-                                    "address": mock_address,
-                                    "phone": mock_phone,
-                                    "hours": "12:00 PM - 11:30 PM",
-                                    "distance": mock_distance,
-                                    "reviewCount": mock_review_count,
-                                    "popularDishes": get_popular_dishes(rec.cuisine),
-                                    "ambiance": get_ambiance_tags(rec.rating, rec.estimated_cost or 500)
-                                }
-                                enriched.append(rec_item)
-                                
-                            st.session_state.recommendations = enriched
-                            st.session_state.ai_summary = result.summary or ""
-                            st.session_state.warnings = result.metadata.warnings or []
-                            st.session_state.view = "results"
-                            st.session_state.previous_view = "search"
-                            st.rerun()
-                            
-                        except OrchestrationError as e:
-                            st.error(f"Recommendation Failed: {e.message}")
-                        except Exception as e:
-                            st.error(f"Something went wrong: {e}")
+                    except OrchestrationError as e:
+                        st.error(f"Recommendation Failed: {e.message}")
+                    except Exception as e:
+                        st.error(f"Something went wrong: {e}")
 
 # 5b. Results View
 elif st.session_state.view == "results":
