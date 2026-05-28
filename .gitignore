@@ -5,8 +5,8 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
-data/*.parquet
 data/*.json
+!data/restaurants.parquet
 !data/.gitkeep
 !data/schema.md
 .DS_Store
