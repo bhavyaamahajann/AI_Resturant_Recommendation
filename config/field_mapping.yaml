@@ -1,0 +1,36 @@
+# Raw Hugging Face columns -> canonical field sources
+# Dataset: ManikaSaini/zomato-restaurant-recommendation
+
+source_columns:
+  name: name
+  address: address
+  area: location
+  cuisines: cuisines
+  rating: rate
+  cost: "approx_cost(for two people)"
+  rest_type: rest_type
+  online_order: online_order
+  book_table: book_table
+  votes: votes
+  url: url
+
+# City detection: substring match in address (case-insensitive)
+city_aliases:
+  Bangalore:
+    - bangalore
+    - bengaluru
+    - banglore
+    - bengalore
+  Delhi:
+    - delhi
+    - new delhi
+  Mumbai:
+    - mumbai
+  Hyderabad:
+    - hyderabad
+  Chennai:
+    - chennai
+  Kolkata:
+    - kolkata
+  Pune:
+    - pune

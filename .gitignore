@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+data/*.parquet
+data/*.json
+!data/.gitkeep
+!data/schema.md
+.DS_Store
+*.egg-info/
+dist/
+build/
+node_modules/
+.streamlit/secrets.toml
