@@ -486,8 +486,8 @@ if st.session_state.view == "search":
         # Minimum Rating slider
         min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
         
-        # Number of Results slider
-        top_n = st.slider("Number of Results", min_value=1, max_value=20, value=9, step=1)
+        # Default top_n recommendations count
+        top_n = 9
         
         # Extras optional text input
         extras_input = st.text_input("Extras (Optional)", placeholder="e.g. outdoor seating, romantic")
