@@ -150,6 +150,24 @@ st.markdown("""
     div[data-testid="stSlider"] div[aria-valuemax] {
         background: linear-gradient(to right, #ff3b30, #ff9500) !important;
     }
+    
+    /* Clickable Restaurant Card container and hover effects */
+    .restaurant-card {
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        background: rgba(30, 41, 59, 0.7) !important;
+        position: relative !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+    }
+    .restaurant-card:hover {
+        transform: translateY(-4px) scale(1.01) !important;
+        border-color: rgba(255, 91, 63, 0.4) !important;
+        box-shadow: 0 12px 40px rgba(255, 91, 63, 0.15) !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -163,8 +181,8 @@ ITALIAN_PHOTOS = [
 ]
 
 INDIAN_PHOTOS = [
-    "photo-1585938338392-50a599e0217b",  # biryani
-    "photo-1601050690597-df056fb4ce78",  # samosa/curry
+    "photo-1626132647523-66f5bf380027",  # thali
+    "photo-1596797038530-2c107229654b",  # curry
     "photo-1565557623262-b51c2513a641",  # tandoori
     "photo-1626777552726-4a6b54c97e46",  # thali
     "photo-1589301760014-d929f3979dbc"   # curry
@@ -269,6 +287,44 @@ if "warnings" not in st.session_state:
 if "budget" not in st.session_state:
     st.session_state.budget = "medium"
 
+# Check query parameters for card selection (allows clicking the entire card)
+if "select" in st.query_params:
+    sel_id = st.query_params["select"]
+    recs = st.session_state.recommendations
+    selected_item = None
+    for r in recs:
+        if r["restaurant_id"] == sel_id:
+            selected_item = r
+            break
+    if not selected_item:
+        # Fallback: check database directly
+        orig_rest = store.get_by_id(sel_id)
+        if orig_rest:
+            selected_item = {
+                "rank": 1,
+                "restaurant_id": orig_rest.id,
+                "name": orig_rest.name,
+                "cuisine": orig_rest.primary_cuisine,
+                "rating": orig_rest.rating,
+                "estimated_cost": orig_rest.cost_estimate or 500,
+                "explanation": "Selected restaurant details",
+                "image": get_cuisine_image(orig_rest.primary_cuisine, 0),
+                "address": orig_rest.raw_attributes.get("address") if orig_rest.raw_attributes else f"{orig_rest.name}, Bangalore",
+                "phone": "+91 80 40000000",
+                "hours": "12:00 PM - 11:30 PM",
+                "distance": "1.5 km",
+                "reviewCount": 120,
+                "popularDishes": get_popular_dishes(orig_rest.primary_cuisine),
+                "ambiance": get_ambiance_tags(orig_rest.rating, orig_rest.cost_estimate or 500)
+            }
+    if selected_item:
+        st.session_state.selected_item = selected_item
+        st.session_state.view = "detail"
+        st.session_state.previous_view = "results"
+        # Clear the parameter so it doesn't get sticky on back button
+        st.query_params.clear()
+        st.rerun()
+
 # 5. Render Views
 # 5a. Search View
 if st.session_state.view == "search":
@@ -317,8 +373,9 @@ if st.session_state.view == "search":
         
         # Location dropdown
         locations = store.known_locations(limit=100)
-        locations = [loc for loc in locations if loc.lower() != "bangalore"]
-        locations = ["-select a location-"] + sorted(locations)
+        cleaned_locs = list(set(loc.strip() for loc in locations if loc.strip()))
+        cleaned_locs = [loc for loc in cleaned_locs if loc.lower() != "bangalore"]
+        locations = ["-select a location-"] + sorted(cleaned_locs)
         selected_location = st.selectbox("Location", options=locations)
         
         # Cuisine text input
@@ -522,49 +579,46 @@ elif st.session_state.view == "results":
                 if i + j < len(recs):
                     item = recs[i+j]
                     with cols[j]:
-                        # Card markup (cleaned of leading whitespaces to prevent markdown parser codeblocks)
+                        # Card markup (wrapped in clickable link, using premium transitions)
                         st.markdown(clean_html(f"""
-                            <div style='border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; background: rgba(30, 41, 59, 0.7); position: relative; margin-bottom: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
-                                <div style='position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #f97316); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white !important; z-index: 10;'>
-                                    #{item['rank']}
+                            <a href='?select={item["restaurant_id"]}' target='_self' style='text-decoration: none !important; color: inherit !important; display: block;'>
+                                <div class='restaurant-card'>
+                                    <div style='position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f43f5e, #f97316); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white !important; z-index: 10;'>
+                                        #{item['rank']}
+                                    </div>
+                                    <div style='height: 180px; width: 100%; overflow: hidden; position: relative;'>
+                                        <img src='{item['image']}' style='width: 100%; height: 100%; object-fit: cover;' />
+                                        <div style='position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%);'></div>
+                                    </div>
+                                    <div style='padding: 20px;'>
+                                        <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: white;'>{item['name']}</h3>
+                                        <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
+                                            <span style='color: #fbbf24; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
+                                                ⭐ {item['rating']:.1f} <span style='color: #64748b; font-size: 0.75rem; font-weight: 400;'>({item['reviewCount']})</span>
+                                            </span>
+                                            <span style='color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;'>
+                                                📍 {item['distance']}
+                                            </span>
+                                        </div>
+                                        <div style='display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;'>
+                                            <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #e2e8f0;'>
+                                                {item['cuisine']}
+                                            </span>
+                                            <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; color: #34d399;'>
+                                                ₹{item['estimated_cost']:.0f} for two
+                                            </span>
+                                        </div>
+                                        <div style='margin-bottom: 12px;'>
+                                            <span style='font-size: 0.75rem; color: #64748b; display: block; margin-bottom: 2px;'>Popular:</span>
+                                            <p style='margin: 0; font-size: 0.85rem; color: #cbd5e1;'>{", ".join(item['popularDishes'])}</p>
+                                        </div>
+                                        <div style='display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;'>
+                                            {" ".join([f'<span style="padding: 2px 6px; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.15); font-size: 0.7rem; color: #f43f5e;">{tag}</span>' for tag in item['ambiance']])}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style='height: 180px; width: 100%; overflow: hidden; position: relative;'>
-                                    <img src='{item['image']}' style='width: 100%; height: 100%; object-fit: cover;' />
-                                    <div style='position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%);'></div>
-                                </div>
-                                <div style='padding: 20px;'>
-                                    <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: white;'>{item['name']}</h3>
-                                    <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
-                                        <span style='color: #fbbf24; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
-                                            ⭐ {item['rating']:.1f} <span style='color: #64748b; font-size: 0.75rem; font-weight: 400;'>({item['reviewCount']})</span>
-                                        </span>
-                                        <span style='color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;'>
-                                            📍 {item['distance']}
-                                        </span>
-                                    </div>
-                                    <div style='display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;'>
-                                        <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #e2e8f0;'>
-                                            {item['cuisine']}
-                                        </span>
-                                        <span style='padding: 3px 8px; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; color: #34d399;'>
-                                            ₹{item['estimated_cost']:.0f} for two
-                                        </span>
-                                    </div>
-                                    <div style='margin-bottom: 12px;'>
-                                        <span style='font-size: 0.75rem; color: #64748b; display: block; margin-bottom: 2px;'>Popular:</span>
-                                        <p style='margin: 0; font-size: 0.85rem; color: #cbd5e1;'>{", ".join(item['popularDishes'])}</p>
-                                    </div>
-                                    <div style='display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;'>
-                                        {" ".join([f'<span style="padding: 2px 6px; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.15); font-size: 0.7rem; color: #f43f5e;">{tag}</span>' for tag in item['ambiance']])}
-                                    </div>
-                                </div>
-                            </div>
+                            </a>
                         """), unsafe_allow_html=True)
-                        if st.button("View Details", key=f"btn_details_{item['restaurant_id']}", use_container_width=True):
-                            st.session_state.selected_item = item
-                            st.session_state.view = "detail"
-                            st.session_state.previous_view = "results"
-                            st.rerun()
 
 # 5c. Detail View
 elif st.session_state.view == "detail" and st.session_state.selected_item:
