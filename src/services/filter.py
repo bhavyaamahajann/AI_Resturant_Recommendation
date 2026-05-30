@@ -123,7 +123,7 @@ class CandidateFilterService:
 
         if total_before_cap > self._settings.candidate_limit:
             warnings.append(
-                f"Showing top {len(capped)} of {total_before_cap} matches."
+                f"Analyzing top {len(capped)} of {total_before_cap} matches for AI recommendations."
             )
 
         metadata = CandidateMetadata(

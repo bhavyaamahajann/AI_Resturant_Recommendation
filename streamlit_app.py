@@ -40,28 +40,68 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Style all text inputs */
-    div[data-baseweb="input"] {
-        background-color: #141a24 !important;
-        border: 1px solid rgba(45, 55, 72, 0.8) !important;
+    /* Style all text inputs, select boxes, and their children */
+    div[data-testid="stTextInput"] > div,
+    div[data-testid="stSelectbox"] > div,
+    div[data-baseweb="input"],
+    div[data-baseweb="select"],
+    input,
+    select {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1.5px solid #475569 !important;
         border-radius: 12px !important;
-    }
-    div[data-baseweb="input"] input {
-        color: white !important;
-        background-color: transparent !important;
-        font-size: 0.9rem !important;
     }
     
-    /* Style select boxes */
-    div[data-baseweb="select"] {
-        background-color: #141a24 !important;
-        border: 1px solid rgba(45, 55, 72, 0.8) !important;
-        border-radius: 12px !important;
-    }
-    div[data-baseweb="select"] div {
-        color: white !important;
+    /* Target the text input element specifically */
+    div[data-testid="stTextInput"] input,
+    div[data-baseweb="input"] input,
+    input {
+        color: #ffffff !important;
         background-color: transparent !important;
-        font-size: 0.9rem !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Style select boxes selection text */
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] div,
+    div[data-baseweb="select"] div {
+        color: #ffffff !important;
+        background-color: transparent !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Target placeholders */
+    ::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+    }
+    
+    :-ms-input-placeholder {
+        color: #94a3b8 !important;
+    }
+    
+    ::-ms-input-placeholder {
+        color: #94a3b8 !important;
+    }
+
+    /* Input focus state */
+    div[data-testid="stTextInput"] > div:focus-within,
+    div[data-baseweb="input"]:focus-within,
+    div[data-testid="stSelectbox"] > div:focus-within,
+    div[data-baseweb="select"]:focus-within {
+        border-color: #ff5b3f !important;
+        box-shadow: 0 0 0 1px #ff5b3f !important;
+    }
+
+    /* Style select dropdown options list */
+    ul[role="listbox"],
+    ul[role="listbox"] li {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+    }
+    ul[role="listbox"] li:hover {
+        background-color: #ff5b3f !important;
+        color: #ffffff !important;
     }
     
     /* Primary Button (Find Recommendations) */
@@ -277,9 +317,8 @@ if st.session_state.view == "search":
         
         # Location dropdown
         locations = store.known_locations(limit=100)
-        if "Bangalore" in locations:
-            locations.remove("Bangalore")
-            locations = ["Bangalore"] + locations
+        locations = [loc for loc in locations if loc.lower() != "bangalore"]
+        locations = ["-select a location-"] + sorted(locations)
         selected_location = st.selectbox("Location", options=locations)
         
         # Cuisine text input
@@ -306,6 +345,9 @@ if st.session_state.view == "search":
         # Minimum Rating slider
         min_rating = st.slider("Minimum Rating", min_value=0.0, max_value=5.0, value=3.5, step=0.1)
         
+        # Number of Results slider
+        top_n = st.slider("Number of Results", min_value=1, max_value=20, value=9, step=1)
+        
         # Extras optional text input
         extras_input = st.text_input("Extras (Optional)", placeholder="e.g. outdoor seating, romantic")
         
@@ -316,10 +358,69 @@ if st.session_state.view == "search":
         ai_btn = st.button("✨ Get AI Recommendations", use_container_width=True)
         
         if find_btn or ai_btn:
-            if not selected_cuisine:
+            if selected_location == "-select a location-":
+                st.error("Please select a location.")
+            elif not selected_cuisine:
                 st.error("Please enter at least one cuisine.")
             else:
-                with st.spinner("AI is analyzing local matches..."):
+                loader_placeholder = st.empty()
+                loader_placeholder.markdown("""
+                    <div class="overlay-loader">
+                        <div class="spinner-container">
+                            <div class="custom-spinner"></div>
+                            <div class="loader-text">AI is analyzing local matches...</div>
+                        </div>
+                    </div>
+                    <style>
+                    .overlay-loader {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        background: rgba(13, 17, 23, 0.85) !important;
+                        backdrop-filter: blur(8px);
+                        display: flex !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        z-index: 999999 !important;
+                    }
+                    .spinner-container {
+                        text-align: center;
+                        background: rgba(30, 41, 59, 0.85) !important;
+                        padding: 40px !important;
+                        border-radius: 24px !important;
+                        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                    }
+                    .custom-spinner {
+                        width: 60px !important;
+                        height: 60px !important;
+                        border: 4px solid rgba(255, 255, 255, 0.1) !important;
+                        border-top-color: #ff5b3f !important;
+                        border-radius: 50% !important;
+                        animation: spin 1s linear infinite !important;
+                        margin-bottom: 20px !important;
+                    }
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                    .loader-text {
+                        color: white !important;
+                        font-size: 1.2rem !important;
+                        font-weight: 600 !important;
+                        margin: 0 !important;
+                        font-family: sans-serif !important;
+                    }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                success = False
+                try:
                     cuisines_list = [c.strip() for c in selected_cuisine.split(",") if c.strip()]
                     extras_list = [e.strip() for e in extras_input.split(",") if e.strip()] if extras_input else []
                     
@@ -329,55 +430,58 @@ if st.session_state.view == "search":
                         cuisines=cuisines_list,
                         min_rating=min_rating,
                         extras=extras_list,
-                        top_n=9
+                        top_n=top_n
                     )
                     
-                    try:
-                        result = service.recommend(prefs)
+                    result = service.recommend(prefs)
+                    
+                    # Enrich results
+                    enriched = []
+                    for i, rec in enumerate(result.recommendations):
+                        r_id = rec.restaurant_id
+                        mock_distance = f"{((int(r_id[:4], 16) % 35 + 10) / 10):.1f} km"
+                        mock_review_count = int(rec.rating * 74 + (int(r_id[4:6], 16) % 150))
+                        mock_phone = f"+91 80 4{(int(r_id[:6], 16) % 9000000 + 1000000)}"
+                        mock_address = f"{rec.name}, Locality Road, {selected_location}, India"
                         
-                        # Enrich results
-                        enriched = []
-                        for i, rec in enumerate(result.recommendations):
-                            r_id = rec.restaurant_id
-                            mock_distance = f"{((int(r_id[:4], 16) % 35 + 10) / 10):.1f} km"
-                            mock_review_count = int(rec.rating * 74 + (int(r_id[4:6], 16) % 150))
-                            mock_phone = f"+91 80 4{(int(r_id[:6], 16) % 9000000 + 1000000)}"
-                            mock_address = f"{rec.name}, Locality Road, {selected_location}, India"
+                        orig_rest = store.get_by_id(r_id)
+                        if orig_rest and orig_rest.raw_attributes:
+                            mock_address = orig_rest.raw_attributes.get("address", mock_address)
                             
-                            orig_rest = store.get_by_id(r_id)
-                            if orig_rest and orig_rest.raw_attributes:
-                                mock_address = orig_rest.raw_attributes.get("address", mock_address)
-                                
-                            rec_item = {
-                                "rank": rec.rank,
-                                "restaurant_id": rec.restaurant_id,
-                                "name": rec.name,
-                                "cuisine": rec.cuisine,
-                                "rating": rec.rating,
-                                "estimated_cost": rec.estimated_cost or 500,
-                                "explanation": rec.explanation,
-                                "image": get_cuisine_image(rec.cuisine, i),
-                                "address": mock_address,
-                                "phone": mock_phone,
-                                "hours": "12:00 PM - 11:30 PM",
-                                "distance": mock_distance,
-                                "reviewCount": mock_review_count,
-                                "popularDishes": get_popular_dishes(rec.cuisine),
-                                "ambiance": get_ambiance_tags(rec.rating, rec.estimated_cost or 500)
-                            }
-                            enriched.append(rec_item)
-                            
-                        st.session_state.recommendations = enriched
-                        st.session_state.ai_summary = result.summary or ""
-                        st.session_state.warnings = result.metadata.warnings or []
-                        st.session_state.view = "results"
-                        st.session_state.previous_view = "search"
-                        st.rerun()
+                        rec_item = {
+                            "rank": rec.rank,
+                            "restaurant_id": rec.restaurant_id,
+                            "name": rec.name,
+                            "cuisine": rec.cuisine,
+                            "rating": rec.rating,
+                            "estimated_cost": rec.estimated_cost or 500,
+                            "explanation": rec.explanation,
+                            "image": get_cuisine_image(rec.cuisine, i),
+                            "address": mock_address,
+                            "phone": mock_phone,
+                            "hours": "12:00 PM - 11:30 PM",
+                            "distance": mock_distance,
+                            "reviewCount": mock_review_count,
+                            "popularDishes": get_popular_dishes(rec.cuisine),
+                            "ambiance": get_ambiance_tags(rec.rating, rec.estimated_cost or 500)
+                        }
+                        enriched.append(rec_item)
                         
-                    except OrchestrationError as e:
-                        st.error(f"Recommendation Failed: {e.message}")
-                    except Exception as e:
-                        st.error(f"Something went wrong: {e}")
+                    st.session_state.recommendations = enriched
+                    st.session_state.ai_summary = result.summary or ""
+                    st.session_state.warnings = result.metadata.warnings or []
+                    st.session_state.view = "results"
+                    st.session_state.previous_view = "search"
+                    success = True
+                except OrchestrationError as e:
+                    st.error(f"Recommendation Failed: {e.message}")
+                except Exception as e:
+                    st.error(f"Something went wrong: {e}")
+                finally:
+                    loader_placeholder.empty()
+                
+                if success:
+                    st.rerun()
 
 # 5b. Results View
 elif st.session_state.view == "results":
