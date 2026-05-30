@@ -41,8 +41,6 @@ st.markdown("""
     }
     
     /* Style all text inputs, select boxes, and their children */
-    div[data-testid="stTextInput"] > div,
-    div[data-testid="stSelectbox"] > div,
     div[data-baseweb="input"],
     div[data-baseweb="select"],
     input,
@@ -54,7 +52,6 @@ st.markdown("""
     }
     
     /* Target the text input element specifically */
-    div[data-testid="stTextInput"] input,
     div[data-baseweb="input"] input,
     input {
         color: #ffffff !important;
@@ -63,7 +60,6 @@ st.markdown("""
     }
 
     /* Style select boxes selection text */
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] div,
     div[data-baseweb="select"] div {
         color: #ffffff !important;
         background-color: transparent !important;
@@ -85,9 +81,7 @@ st.markdown("""
     }
 
     /* Input focus state */
-    div[data-testid="stTextInput"] > div:focus-within,
     div[data-baseweb="input"]:focus-within,
-    div[data-testid="stSelectbox"] > div:focus-within,
     div[data-baseweb="select"]:focus-within {
         border-color: #ff5b3f !important;
         box-shadow: 0 0 0 1px #ff5b3f !important;
