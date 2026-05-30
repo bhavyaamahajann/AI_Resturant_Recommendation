@@ -21,149 +21,222 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS injection for premium glassmorphism aesthetics
-st.markdown("""
-    <style>
-    /* Gradient Background */
-    .stApp {
-        background: linear-gradient(135deg, #0d1117 0%, #171d26 50%, #0d1117 100%) !important;
-        color: #f8fafc !important;
-    }
-    
-    /* Input Labels and Text */
-    label, p, span, h1, h2, h3, h4, h5, h6 {
-        color: #cbd5e1 !important;
-    }
-    
-    /* Hide Streamlit sidebar by default */
-    section[data-testid="stSidebar"] {
-        display: none !important;
-    }
-    
-    /* Style all text inputs, select boxes, and their children */
-    div[data-baseweb="input"],
-    div[data-baseweb="select"],
-    input,
-    select {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1.5px solid #475569 !important;
-        border-radius: 12px !important;
-    }
-    
-    /* Target the text input element specifically */
-    div[data-baseweb="input"] input,
-    input {
-        color: #ffffff !important;
-        background-color: transparent !important;
-        font-size: 0.95rem !important;
-    }
+# Initialize Theme session state early
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
 
-    /* Style select boxes selection text */
-    div[data-baseweb="select"] div {
-        color: #ffffff !important;
-        background-color: transparent !important;
-        font-size: 0.95rem !important;
-    }
+# 2. Inject CSS Theme styling dynamically
+def inject_theme_css():
+    theme = st.session_state.theme
+    if theme == "dark":
+        css_vars = """
+            background: linear-gradient(135deg, #0d1117 0%, #171d26 50%, #0d1117 100%) !important;
+            color: #cbd5e1 !important;
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            --dish-bg: rgba(51, 65, 85, 0.4);
+            --dish-border: rgba(255, 255, 255, 0.06);
+            --input-bg: #1e293b;
+            --input-text: #ffffff;
+            --input-border: #475569;
+            --btn-secondary-bg: #1e2530;
+            --btn-secondary-text: #ffffff;
+            --btn-secondary-border: rgba(71, 85, 105, 0.6);
+            --btn-secondary-hover: rgba(255, 255, 255, 0.05);
+            --summary-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+            --summary-border: rgba(16, 185, 129, 0.2);
+            --tag-bg: linear-gradient(to right, rgba(244, 63, 94, 0.15), rgba(249, 115, 22, 0.15));
+            --tag-border: rgba(244, 63, 94, 0.25);
+            --tag-text: #fecdd3;
+        """
+    else:
+        css_vars = """
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%) !important;
+            color: #334155 !important;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --card-border: rgba(15, 23, 42, 0.08);
+            --card-shadow: rgba(15, 23, 42, 0.06);
+            --dish-bg: #f1f5f9;
+            --dish-border: rgba(15, 23, 42, 0.06);
+            --input-bg: #ffffff;
+            --input-text: #0f172a;
+            --input-border: #cbd5e1;
+            --btn-secondary-bg: #ffffff;
+            --btn-secondary-text: #0f172a;
+            --btn-secondary-border: rgba(203, 213, 225, 0.8);
+            --btn-secondary-hover: rgba(15, 23, 42, 0.04);
+            --summary-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(5, 150, 105, 0.03));
+            --summary-border: rgba(16, 185, 129, 0.15);
+            --tag-bg: linear-gradient(to right, rgba(244, 63, 94, 0.1), rgba(249, 115, 22, 0.1));
+            --tag-border: rgba(244, 63, 94, 0.2);
+            --tag-text: #e11d48;
+        """
 
-    /* Target placeholders */
-    ::placeholder {
-        color: #94a3b8 !important;
-        opacity: 1 !important;
-    }
-    
-    :-ms-input-placeholder {
-        color: #94a3b8 !important;
-    }
-    
-    ::-ms-input-placeholder {
-        color: #94a3b8 !important;
-    }
+    st.markdown(f"""
+        <style>
+        .stApp {{
+            {css_vars}
+        }}
+        
+        /* Input Labels and Text */
+        label, p, span, h1, h2, h3, h4, h5, h6, #brand-title, #tagline {{
+            color: var(--text-secondary) !important;
+        }}
+        
+        #brand-title, h1, h2, h3 {{
+            color: var(--text-primary) !important;
+        }}
 
-    /* Input focus state */
-    div[data-baseweb="input"]:focus-within,
-    div[data-baseweb="select"]:focus-within {
-        border-color: #ff5b3f !important;
-        box-shadow: 0 0 0 1px #ff5b3f !important;
-    }
+        #tagline {{
+            color: var(--text-muted) !important;
+        }}
+        
+        /* Hide Streamlit sidebar by default */
+        section[data-testid="stSidebar"] {{
+            display: none !important;
+        }}
+        
+        /* Style all text inputs, select boxes, and their children */
+        div[data-baseweb="input"],
+        div[data-baseweb="select"],
+        input,
+        select {{
+            background-color: var(--input-bg) !important;
+            color: var(--input-text) !important;
+            border: 1.5px solid var(--input-border) !important;
+            border-radius: 12px !important;
+        }}
+        
+        /* Target the text input element specifically */
+        div[data-baseweb="input"] input,
+        input {{
+            color: var(--input-text) !important;
+            background-color: transparent !important;
+            font-size: 0.95rem !important;
+        }}
 
-    /* Style select dropdown options list */
-    ul[role="listbox"],
-    ul[role="listbox"] li {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-    }
-    ul[role="listbox"] li:hover {
-        background-color: #ff5b3f !important;
-        color: #ffffff !important;
-    }
-    
-    /* Primary Button (Find Recommendations) */
-    div.stButton > button[kind="primary"] {
-        background: linear-gradient(to right, #ff3b30, #ff9500) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 9999px !important;
-        padding: 12px 24px !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        box-shadow: 0 4px 20px rgba(255, 59, 48, 0.25) !important;
-        transition: all 0.3s ease !important;
-        width: 100% !important;
-    }
-    div.stButton > button[kind="primary"]:hover {
-        box-shadow: 0 4px 25px rgba(255, 59, 48, 0.4) !important;
-        transform: translateY(-1px) !important;
-    }
-    
-    /* Secondary Button (Get AI Recommendations / View Details) */
-    div.stButton > button:not([kind="primary"]) {
-        background-color: #1e2530 !important;
-        color: white !important;
-        border: 1px solid rgba(71, 85, 105, 0.6) !important;
-        border-radius: 9999px !important;
-        padding: 10px 24px !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        transition: all 0.3s ease !important;
-        width: 100% !important;
-    }
-    div.stButton > button:not([kind="primary"]):hover {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border-color: #10b981 !important;
-    }
-    
-    /* Rating Slider thumb and filled track styling */
-    div[role="slider"] {
-        background-color: #ff5b3f !important;
-        border: none !important;
-        box-shadow: 0 0 12px rgba(255, 91, 63, 0.8) !important;
-        width: 16px !important;
-        height: 16px !important;
-    }
-    div[data-testid="stSlider"] div[aria-valuemax] {
-        background: linear-gradient(to right, #ff3b30, #ff9500) !important;
-    }
-    
-    /* Clickable Restaurant Card container and hover effects */
-    .restaurant-card {
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 16px !important;
-        overflow: hidden !important;
-        background: rgba(30, 41, 59, 0.7) !important;
-        position: relative !important;
-        margin-bottom: 12px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        cursor: pointer !important;
-    }
-    .restaurant-card:hover {
-        transform: translateY(-4px) scale(1.01) !important;
-        border-color: rgba(255, 91, 63, 0.4) !important;
-        box-shadow: 0 12px 40px rgba(255, 91, 63, 0.15) !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+        /* Style select boxes selection text */
+        div[data-baseweb="select"] div {{
+            color: var(--input-text) !important;
+            background-color: transparent !important;
+            font-size: 0.95rem !important;
+        }}
+
+        /* Target placeholders */
+        ::placeholder {{
+            color: var(--text-muted) !important;
+            opacity: 1 !important;
+        }}
+        
+        :-ms-input-placeholder {{
+            color: var(--text-muted) !important;
+        }}
+        
+        ::-ms-input-placeholder {{
+            color: var(--text-muted) !important;
+        }}
+
+        /* Style selectbox placeholder to be greyed out */
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] [data-placeholder] {{
+            color: var(--text-muted) !important;
+        }}
+
+        /* Input focus state */
+        div[data-baseweb="input"]:focus-within,
+        div[data-baseweb="select"]:focus-within {{
+            border-color: #ff5b3f !important;
+            box-shadow: 0 0 0 1px #ff5b3f !important;
+        }}
+
+        /* Style select dropdown options list */
+        ul[role="listbox"],
+        ul[role="listbox"] li {{
+            background-color: var(--input-bg) !important;
+            color: var(--input-text) !important;
+        }}
+        ul[role="listbox"] li:hover {{
+            background-color: #ff5b3f !important;
+            color: #ffffff !important;
+        }}
+        
+        /* Primary Button (Find Recommendations) */
+        div.stButton > button[kind="primary"] {{
+            background: linear-gradient(to right, #ff3b30, #ff9500) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 9999px !important;
+            padding: 12px 24px !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            box-shadow: 0 4px 20px rgba(255, 59, 48, 0.25) !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+        }}
+        div.stButton > button[kind="primary"]:hover {{
+            box-shadow: 0 4px 25px rgba(255, 59, 48, 0.4) !important;
+            transform: translateY(-1px) !important;
+        }}
+        
+        /* Secondary Button (Get AI Recommendations / View Details) */
+        div.stButton > button:not([kind="primary"]) {{
+            background-color: var(--btn-secondary-bg) !important;
+            color: var(--btn-secondary-text) !important;
+            border: 1px solid var(--btn-secondary-border) !important;
+            border-radius: 9999px !important;
+            padding: 10px 24px !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+        }}
+        div.stButton > button:not([kind="primary"]):hover {{
+            background-color: var(--btn-secondary-hover) !important;
+            border-color: #10b981 !important;
+        }}
+        
+        /* Rating Slider thumb and filled track styling */
+        div[role="slider"] {{
+            background-color: #ff5b3f !important;
+            border: none !important;
+            box-shadow: 0 0 12px rgba(255, 91, 63, 0.8) !important;
+            width: 16px !important;
+            height: 16px !important;
+        }}
+        div[data-testid="stSlider"] div[aria-valuemax] {{
+            background: linear-gradient(to right, #ff3b30, #ff9500) !important;
+        }}
+        
+        /* Clickable Restaurant Card container and hover effects */
+        .restaurant-card {{
+            border: 1px solid var(--card-border) !important;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            background: var(--card-bg) !important;
+            position: relative !important;
+            margin-bottom: 12px !important;
+            box-shadow: 0 8px 32px var(--card-shadow) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer !important;
+        }}
+        .restaurant-card:hover {{
+            transform: translateY(-4px) scale(1.01) !important;
+            border-color: rgba(255, 91, 63, 0.4) !important;
+            box-shadow: 0 12px 40px rgba(255, 91, 63, 0.15) !important;
+            vertical-align: middle !important;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+
+# Inject the style sheet immediately
+inject_theme_css()
 
 # Unsplash Photo ID Collections for Dynamic Image Sourcing
 ITALIAN_PHOTOS = [
@@ -319,37 +392,9 @@ if "select" in st.query_params:
         st.query_params.clear()
         st.rerun()
 
-# 5. Render Views
-# 5a. Search View
-if st.session_state.view == "search":
-    # Dynamic search-specific styles (restricts form wrapper width & styles budget columns)
-    st.markdown("""
-        <style>
-        /* Restrict main container width & top padding only on search view */
-        .block-container {
-            max-width: 800px !important;
-            padding-top: 3rem !important;
-            padding-bottom: 3rem !important;
-            margin: 0 auto !important;
-        }
-        /* Card container styling (only on search screen) */
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #1e2530 !important;
-            border: 1px solid rgba(71, 85, 105, 0.4) !important;
-            border-radius: 16px !important;
-            padding: 32px !important;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
-            width: 100% !important;
-        }
-        /* Style buttons inside columns (budget buttons) */
-        div[data-testid="column"] div.stButton > button {
-            border-radius: 12px !important;
-            padding: 12px 16px !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # Render header directly (no columns, centered container with max-width 800px)
+# Render global header with Theme Switcher
+h_col1, h_col2 = st.columns([6, 1])
+with h_col1:
     st.markdown(clean_html("""
         <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 4px; justify-content: flex-start; padding-top: 0px;'>
             <div style='width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(to right, #ff3b30, #ff9500); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);'>
@@ -357,20 +402,64 @@ if st.session_state.view == "search":
                     <path d="M12 2Q12 12 22 12Q12 12 12 22Q12 12 2 12Q12 12 12 2" />
                 </svg>
             </div>
-            <h1 style='margin: 0; font-size: 2.2rem; color: white !important; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
+            <h1 id='brand-title' style='margin: 0; font-size: 2.2rem; font-weight: 700; tracking-wide: 0.05em;'>FlavorIQ</h1>
         </div>
-        <p style='color: #94a3b8 !important; font-size: 0.95rem; margin-top: 0; text-align: left; margin-bottom: 32px;'>AI-powered culinary intelligence for your perfect dining experience</p>
     """), unsafe_allow_html=True)
+with h_col2:
+    # Theme toggle button
+    theme_emoji = "☀️" if st.session_state.theme == "dark" else "🌙"
+    if st.button(theme_emoji, key="theme_toggle", help="Switch between Light and Dark mode", use_container_width=True):
+        st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
+        st.rerun()
+        
+st.markdown(clean_html("""
+    <p id='tagline' style='font-size: 0.95rem; margin-top: 0; text-align: left; margin-bottom: 32px;'>AI-powered culinary intelligence for your perfect dining experience</p>
+"""), unsafe_allow_html=True)
+
+# 5. Render Views
+# 5a. Search View
+if st.session_state.view == "search":
+    # Dynamic search-specific styles (restricts form wrapper width & styles budget columns)
+    theme = st.session_state.theme
+    form_bg = "#1e2530" if theme == "dark" else "#ffffff"
+    form_border = "rgba(71, 85, 105, 0.4)" if theme == "dark" else "rgba(203, 213, 225, 0.8)"
+    form_shadow = "rgba(0, 0, 0, 0.5)" if theme == "dark" else "rgba(15, 23, 42, 0.05)"
+    
+    st.markdown(f"""
+        <style>
+        /* Restrict main container width & top padding only on search view */
+        .block-container {{
+            max-width: 800px !important;
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+            margin: 0 auto !important;
+        }}
+        /* Card container styling (only on search screen) */
+        div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background-color: {form_bg} !important;
+            border: 1px solid {form_border} !important;
+            border-radius: 16px !important;
+            padding: 32px !important;
+            box-shadow: 0 12px 40px {form_shadow} !important;
+            width: 100% !important;
+        }}
+        /* Style buttons inside columns (budget buttons) */
+        div[data-testid="column"] div.stButton > button {{
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
     
     with st.container(border=True):
-        st.markdown("<h2 style='margin-top:0; font-size: 1.5rem; font-weight: 700; color: white !important; margin-bottom: 24px;'>Preferences</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin-top:0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary) !important; margin-bottom: 24px;'>Preferences</h2>", unsafe_allow_html=True)
         
         # Location dropdown
         locations = store.known_locations(limit=100)
         cleaned_locs = list(set(loc.strip() for loc in locations if loc.strip()))
         cleaned_locs = [loc for loc in cleaned_locs if loc.lower() != "bangalore"]
-        locations = ["-select a location-"] + sorted(cleaned_locs)
-        selected_location = st.selectbox("Location", options=locations)
+        locations = sorted(cleaned_locs)
+        selected_location = st.selectbox("Location", options=locations, index=None, placeholder="Select a location")
         
         # Cuisine text input
         selected_cuisine = st.text_input("Cuisine", placeholder="e.g. Italian, North Indian")
@@ -409,7 +498,7 @@ if st.session_state.view == "search":
         ai_btn = st.button("✨ Get AI Recommendations", use_container_width=True)
         
         if find_btn or ai_btn:
-            if selected_location == "-select a location-":
+            if selected_location is None:
                 st.error("Please select a location.")
             elif not selected_cuisine:
                 st.error("Please enter at least one cuisine.")
@@ -551,7 +640,7 @@ elif st.session_state.view == "results":
                     <span style='font-size: 1.2rem; color: #10b981;'>✨</span>
                     <div>
                         <h3 style='margin: 0 0 4px 0; color: #10b981 !important; font-size: 1.1rem; font-weight: 600;'>AI Summary</h3>
-                        <p style='margin: 0; color: #cbd5e1 !important; font-size: 0.9rem; line-height: 1.5;'>{st.session_state.ai_summary}</p>
+                        <p style='margin: 0; color: var(--text-secondary) !important; font-size: 0.9rem; line-height: 1.5;'>{st.session_state.ai_summary}</p>
                     </div>
                 </div>
             </div>
@@ -585,7 +674,7 @@ elif st.session_state.view == "results":
                                         <div style='position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%);'></div>
                                     </div>
                                     <div style='padding: 20px;'>
-                                        <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: white;'>{item['name']}</h3>
+                                        <h3 style='margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary) !important;'>{item['name']}</h3>
                                         <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
                                             <span style='color: #fbbf24; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 4px;'>
                                                 ⭐ {item['rating']:.1f} <span style='color: #64748b; font-size: 0.75rem; font-weight: 400;'>({item['reviewCount']})</span>
@@ -604,7 +693,7 @@ elif st.session_state.view == "results":
                                         </div>
                                         <div style='margin-bottom: 12px;'>
                                             <span style='font-size: 0.75rem; color: #64748b; display: block; margin-bottom: 2px;'>Popular:</span>
-                                            <p style='margin: 0; font-size: 0.85rem; color: #cbd5e1;'>{", ".join(item['popularDishes'])}</p>
+                                            <p style='margin: 0; font-size: 0.85rem; color: var(--text-secondary) !important;'>{", ".join(item['popularDishes'])}</p>
                                         </div>
                                         <div style='display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;'>
                                             {" ".join([f'<span style="padding: 2px 6px; border-radius: 4px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.15); font-size: 0.7rem; color: #f43f5e;">{tag}</span>' for tag in item['ambiance']])}
@@ -652,34 +741,34 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
     
     with col_left:
         st.markdown(clean_html(f"""
-            <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
-                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Ambiance & Features</h3>
+            <div style='background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px var(--card-shadow);'>
+                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: var(--text-primary) !important; margin-bottom: 16px;'>Ambiance & Features</h3>
                 <div style='display: flex; flex-wrap: wrap; gap: 10px;'>
-                    {" ".join([f'<span style="padding: 6px 14px; border-radius: 9999px; background: linear-gradient(to right, rgba(244,63,94,0.15), rgba(249,115,22,0.15)); border: 1px solid rgba(244,63,94,0.25); color: #fecdd3; font-weight: 500; font-size: 0.85rem;">{tag}</span>' for tag in item['ambiance']])}
+                    {" ".join([f'<span style="padding: 6px 14px; border-radius: 9999px; background: var(--tag-bg); border: 1px solid var(--tag-border); color: var(--tag-text) !important; font-weight: 500; font-size: 0.85rem;">{tag}</span>' for tag in item['ambiance']])}
                 </div>
             </div>
         """), unsafe_allow_html=True)
         
         st.markdown(clean_html(f"""
-            <div style='background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);'>
+            <div style='background: var(--summary-bg); border: 1px solid var(--summary-border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px var(--card-shadow);'>
                 <div style='display: flex; gap: 12px; align-items: start;'>
                     <span style='font-size: 1.3rem; color: #10b981; margin-top: 2px;'>✨</span>
                     <div>
                         <h3 style='margin: 0 0 8px 0; color: #10b981 !important; font-size: 1.2rem; font-weight: 600;'>Why AI Recommends This</h3>
-                        <p style='margin: 0; color: #e2e8f0 !important; font-size: 0.95rem; line-height: 1.6; font-style: italic;'>"{item['explanation']}"</p>
+                        <p style='margin: 0; color: var(--text-secondary) !important; font-size: 0.95rem; line-height: 1.6; font-style: italic;'>"{item['explanation']}"</p>
                     </div>
                 </div>
             </div>
         """), unsafe_allow_html=True)
         
         st.markdown(clean_html(f"""
-            <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
-                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 16px;'>Must-Try Dishes</h3>
+            <div style='background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 32px var(--card-shadow);'>
+                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: var(--text-primary) !important; margin-bottom: 16px;'>Must-Try Dishes</h3>
                 <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;'>
                     {" ".join([f'''
-                        <div style='padding: 16px; border-radius: 12px; background: rgba(51, 65, 85, 0.4); border: 1px solid rgba(255,255,255,0.06);'>
+                        <div style='padding: 16px; border-radius: 12px; background: var(--dish-bg); border: 1px solid var(--dish-border);'>
                             <span style='font-size: 1.1rem; display: block; margin-bottom: 6px;'>🍽️</span>
-                            <span style='color: white; font-weight: 500; font-size: 0.9rem;'>{dish}</span>
+                            <span style='color: var(--text-primary) !important; font-weight: 500; font-size: 0.9rem;'>{dish}</span>
                         </div>
                     ''' for dish in item['popularDishes']])}
                 </div>
@@ -688,38 +777,38 @@ elif st.session_state.view == "detail" and st.session_state.selected_item:
         
     with col_right:
         st.markdown(clean_html(f"""
-            <div style='background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);'>
-                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 20px;'>Details</h3>
+            <div style='background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px var(--card-shadow);'>
+                <h3 style='margin-top: 0; font-size: 1.2rem; font-weight: 600; color: var(--text-primary) !important; margin-bottom: 20px;'>Details</h3>
                 
                 <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 20px;'>
                     <span style='color: #f43f5e; font-size: 1.1rem;'>📍</span>
                     <div>
-                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Address</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['address']}</span>
+                        <span style='color: var(--text-muted) !important; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Address</span>
+                        <span style='color: var(--text-secondary) !important; font-size: 0.85rem;'>{item['address']}</span>
                     </div>
                 </div>
                 
                 <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 20px;'>
                     <span style='color: #f97316; font-size: 1.1rem;'>🧭</span>
                     <div>
-                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Distance</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['distance']} away</span>
+                        <span style='color: var(--text-muted) !important; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Distance</span>
+                        <span style='color: var(--text-secondary) !important; font-size: 0.85rem;'>{item['distance']} away</span>
                     </div>
                 </div>
                 
                 <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 20px;'>
                     <span style='color: #10b981; font-size: 1.1rem;'>📞</span>
                     <div>
-                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Phone</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['phone']}</span>
+                        <span style='color: var(--text-muted) !important; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Phone</span>
+                        <span style='color: var(--text-secondary) !important; font-size: 0.85rem;'>{item['phone']}</span>
                     </div>
                 </div>
                 
                 <div style='display: flex; gap: 12px; align-items: start; margin-bottom: 24px;'>
                     <span style='color: #3b82f6; font-size: 1.1rem;'>🕒</span>
                     <div>
-                        <span style='color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Hours</span>
-                        <span style='color: #cbd5e1; font-size: 0.85rem;'>{item['hours']}</span>
+                        <span style='color: var(--text-muted) !important; font-size: 0.75rem; display: block; margin-bottom: 2px;'>Hours</span>
+                        <span style='color: var(--text-secondary) !important; font-size: 0.85rem;'>{item['hours']}</span>
                     </div>
                 </div>
             </div>
