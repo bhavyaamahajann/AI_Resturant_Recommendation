@@ -104,9 +104,8 @@ def inject_theme_css():
         }}
         
         /* Style all text inputs, select boxes, and their children */
-        div[data-baseweb="input"],
+        div[data-baseweb="base-input"],
         div[data-baseweb="select"],
-        input,
         select {{
             background-color: var(--input-bg) !important;
             color: var(--input-text) !important;
@@ -115,11 +114,13 @@ def inject_theme_css():
         }}
         
         /* Target the text input element specifically */
-        div[data-baseweb="input"] input,
-        input {{
+        div[data-baseweb="base-input"] input {{
             color: var(--input-text) !important;
             background-color: transparent !important;
             font-size: 0.95rem !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
         }}
 
         /* Style select boxes selection text */
@@ -150,7 +151,7 @@ def inject_theme_css():
         }}
 
         /* Input focus state */
-        div[data-baseweb="input"]:focus-within,
+        div[data-baseweb="base-input"]:focus-within,
         div[data-baseweb="select"]:focus-within {{
             border-color: #ff5b3f !important;
             box-shadow: 0 0 0 1px #ff5b3f !important;
